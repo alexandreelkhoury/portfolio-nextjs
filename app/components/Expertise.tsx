@@ -242,7 +242,7 @@ export default function Expertise() {
 
   return (
     <section id="expertise" className="relative pt-10 overflow-visible z-30">
-      <CursorGlow />
+      {/* <CursorGlow /> */}
 
       {/* Animated logo background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0A] via-[#0A0A0A] to-[#0A0A0A] overflow-hidden">
@@ -289,7 +289,7 @@ export default function Expertise() {
           );
         })}
       </div>
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-7 pt-14 pb-40">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-7 pt-14">
         <div className="flex justify-center relative px-4 sm:px-6 lg:px-8">
           <motion.div
             className="relative"
@@ -352,7 +352,7 @@ export default function Expertise() {
             </motion.div>
           </div>
 
-          <div ref={ref} className="relative pt-20 sm:pt-30">
+          <div ref={ref} className="relative pt-20 sm:pt-30 pb-30">
             {/* Timeline Path */}
             <motion.div
               className="absolute left-1/2 -translate-x-1/2 w-1 h-full rounded-full bg-gradient-to-b from-indigo-300 via-indigo-500 to-indigo-700 z-0"

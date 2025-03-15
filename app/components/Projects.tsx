@@ -86,7 +86,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 + index * 0.1 }}
-          className={`text-4xl font-bold text-white mb-4 transition-colors duration-300`}
+          className={`text-4xl font-bold text-neutral-300 mb-4 transition-colors duration-300`}
         >
           {project.title}
         </motion.h3>
@@ -150,11 +150,11 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
 
 const Projects = () => {
   return (
-    <section className="min-h-screen bg-[#0A0A0A]">
+    <section id="projects" className="min-h-screen bg-[#0A0A0A]">
       <div className="container relative mx-auto px-4 pt-20">
-        <TimelineDemo/>
+        {/* <TimelineDemo/> */}
         {/* Section Title */}
-        {/* <div className="flex justify-center mb-36">
+        <div className="flex justify-center mb-36">
           <motion.div
             className="relative text-center max-w-2xl"
             initial={{ opacity: 0, y: 50 }}
@@ -172,17 +172,17 @@ const Projects = () => {
               />
             </h2>
           </motion.div>
-        </div> */}
+        </div>
 
-        {/* <div className="grid gap-8 md:grid-cols-2"> */}
-          {/* {projects.map((project, index) => (
+        <div className="grid gap-8 md:grid-cols-2">
+          {projects.map((project, index) => (
             <ProjectCard
               key={project.title}
               project={project}
               index={index}
             />
-          ))} */}
-        {/* </div> */}
+          ))}
+        </div>
       </div>
     </section>
   );

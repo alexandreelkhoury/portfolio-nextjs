@@ -54,7 +54,7 @@ export default function Home() {
         <SplineSceneBasic />
         {/* <Hero /> */}
         <Expertise />
-        {/* <Projects /> */}
+        <Projects />
         {/* <TimelineDemo/> */}
         
       </main>

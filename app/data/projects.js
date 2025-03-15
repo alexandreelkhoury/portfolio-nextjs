@@ -3,13 +3,13 @@ const projects = [
     img: '/images/HireWise.png',
     title: 'HireWise',
     url: 'https://hirewise.web.app',
-    tech: ['Solidity', 'React', 'Node.js'],
+    tech: ['React', 'Node.js', 'AI'],
   },
   {
     img: '/images/SplTokenLauncher.png',
     title: 'Spl Token Launcher',
     url: 'https://spltokenlauncher.pro',
-    tech: ['Rust', 'Next.js', 'IPFS'],
+    tech: ['React', 'Node.js', 'Solana', 'IPFS'],
   },
 ];
 
