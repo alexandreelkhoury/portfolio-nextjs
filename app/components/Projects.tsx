@@ -64,7 +64,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
     <motion.div
       ref={ref}
       style={{ scale, y, opacity }}
-      className="group relative h-[450px] md:h-[550px] rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-b from-white/5 to-transparent transition-shadow hover:shadow-glow"
+      className="group relative h-[280px] xs:h-[320px] sm:h-[380px] md:h-[420px] lg:h-[480px] rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-b from-white/5 to-transparent transition-all duration-500 hover:shadow-2xl hover:shadow-white/10"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onMouseMove={handleMouseMove}
@@ -80,13 +80,13 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
       </div>
 
       {/* Content Layer */}
-      <div className="relative z-10 flex h-full flex-col justify-end p-8">
+      <div className="relative z-10 flex h-full flex-col justify-end p-3 sm:p-4 md:p-6 lg:p-8">
         {/* Title */}
         <motion.h3
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 + index * 0.1 }}
-          className={`text-4xl font-bold text-neutral-300 mb-4 transition-colors duration-300`}
+          className={`text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-neutral-300 mb-2 sm:mb-3 md:mb-4 transition-colors duration-300`}
         >
           {project.title}
         </motion.h3>
@@ -99,12 +99,12 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
           className="flex justify-between items-center"
         >
           {/* Tech Stack */}
-          <motion.div className="flex gap-3" variants={container}>
-            {project.tech.map((tech, i) => (
+          <motion.div className="flex gap-1 sm:gap-2 md:gap-3 flex-wrap max-w-[60%]" variants={container}>
+            {project.tech.slice(0, 4).map((tech, i) => (
               <motion.span
                 key={tech}
                 variants={item}
-                className="px-3 py-1 text-xs rounded-full bg-white/10 text-gray-300 backdrop-blur-sm"
+                className="px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 text-[10px] xs:text-xs sm:text-sm rounded-full bg-white/15 text-gray-200 backdrop-blur-sm border border-white/10 font-medium hover:bg-white/20 transition-colors duration-300"
               >
                 {tech}
               </motion.span>
@@ -115,11 +115,11 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
           <motion.a
             href={project.url}
             target="_blank"
-            className="relative flex items-center gap-2 text-sm font-medium text-white px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm transition-all duration-300 hover:bg-white/20"
+            className="relative flex items-center gap-1 sm:gap-2 text-[10px] xs:text-xs sm:text-sm font-medium text-white px-2 sm:px-3 md:px-4 py-1 sm:py-2 rounded-full bg-white/10 backdrop-blur-sm transition-all duration-300 hover:bg-white/20 flex-shrink-0"
             style={{ x: xSpring, y: ySpring }}
             onHoverStart={() => setButtonText('Launch 🚀')}
             onHoverEnd={() => setButtonText('Live Demo')}
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: typeof window !== 'undefined' && window.innerWidth >= 768 ? 1.05 : 1.02 }}
           >
             <AnimatePresence mode="wait">
               <motion.span
@@ -133,7 +133,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
               </motion.span>
             </AnimatePresence>
             <motion.svg
-              className="w-4 h-4 transition-transform duration-300 group-hover:animate-bounce"
+              className="w-3 sm:w-4 h-3 sm:h-4 transition-transform duration-300 group-hover:animate-bounce"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -150,23 +150,23 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
 
 const Projects = () => {
   return (
-    <section id="projects" className="min-h-screen bg-[#0A0A0A]">
-      <div className="container relative mx-auto px-4 pt-20">
+    <section id="projects" className="bg-[#0A0A0A] pb-16 sm:pb-20">
+      <div className="container relative mx-auto px-4 sm:px-6 pt-16 sm:pt-20">
         {/* <TimelineDemo/> */}
         {/* Section Title */}
-        <div className="flex justify-center mb-36">
+        <div className="flex justify-center mb-12 sm:mb-16 md:mb-20">
           <motion.div
-            className="relative text-center max-w-2xl"
+            className="relative text-center max-w-2xl px-4"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <h2 className="text-5xl md:text-7xl font-bold text-transparent 
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-transparent 
              bg-gradient-to-br from-neutral-300 to-neutral-500
              bg-clip-text inline-block relative">
               Featured Projects
-              <div className="absolute -bottom-3 left-0 right-0 mx-auto h-1 
+              <div className="absolute -bottom-1 sm:-bottom-2 md:-bottom-3 left-0 right-0 mx-auto h-0.5 sm:h-1 
               bg-gradient-to-r from-neutral-300 via-neutral-500 to-neutral-700 
               rounded-full"
               />
@@ -174,7 +174,7 @@ const Projects = () => {
           </motion.div>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="grid gap-6 sm:gap-8 lg:grid-cols-2">
           {projects.map((project, index) => (
             <ProjectCard
               key={project.title}

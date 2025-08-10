@@ -108,7 +108,7 @@ html {
   background: var(--background);
   border: 1px solid rgba(var(--foreground-rgb), 0.1);
   border-radius: 12px;
-  margin: 0 auto 4rem auto;
+  margin: 0 auto;
   padding: 2rem;
   max-width: 1200px;
 }
@@ -262,3 +262,137 @@ body {
   }
 }
 
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  /* Disable motion for mobile users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  
+  /* Optimize touch interactions */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  /* Improve text selection on mobile */
+  p, span, h1, h2, h3, h4, h5, h6 {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  
+  /* Ensure text is readable on mobile */
+  body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Improve scrolling on mobile */
+  html {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 475px) {
+  .projects-section {
+    margin: 0 1rem 2rem 1rem;
+    padding: 1rem;
+  }
+  
+  .projects-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Enhanced glassmorphism effect */
+.glass-card {
+  background: linear-gradient(135deg, rgba(17, 17, 17, 0.8), rgba(31, 31, 31, 0.6));
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 255, 255, 0.05);
+}
+
+/* Improved scroll bar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(17, 17, 17, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #C0C0C0, #E5E5E5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #B8B8B8, #D4D4D4);
+}
+
+/* Custom glow animation */
+@keyframes glow-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.6);
+  }
+}
+
+.glow-green {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Enhanced text shadows */
+.text-glow {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+/* Improved button hover effects */
+.btn-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.btn-glass:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Custom text overflow utilities */
+.text-clip {
+  text-overflow: clip;
+}
+
+/* Navbar responsive text handling */
+@media (max-width: 639px) {
+  .navbar-text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 60px;
+  }
+}
+
+@media (min-width: 640px) {
+  .navbar-text {
+    text-overflow: clip !important;
+    overflow: visible !important;
+    max-width: none !important;
+  }
+}

@@ -40,7 +40,7 @@ export default function Home() {
     <div className="transition-container">
       {isLoading && <Loader />}
       <main
-        className={`content ${isLoading ? 'hidden' : 'visible'}`}
+        className={`content ${isLoading ? 'hidden' : 'visible'} space-y-0`}
         style={{
           opacity: isLoading ? 0 : 1,
           transitionDelay: isLoading ? '0s' : '0.3s'

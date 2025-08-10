@@ -5,7 +5,11 @@ module.exports = {
     './pages/**/*.{js,jsx,ts,tsx}', // For Pages Router
     './components/**/*.{js,jsx,ts,tsx}',], // Update with your content paths
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        'xs': '475px',
+      },
+    },
   },
   plugins: [
     plugin('tailwindcss-animate'), // Ensure this line is included

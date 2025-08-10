@@ -12,9 +12,11 @@ const NoSSR = dynamic(() => import('./Spotlight'), { ssr: false })
 
 function SplineSceneBasic() {
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const handleResize = () => {
     setIsLargeScreen(window.innerWidth >= 1500); // 1200px is the breakpoint for wider screens
+    setIsMobile(window.innerWidth < 768); // Mobile breakpoint
   };
 
   useEffect(() => {
@@ -27,14 +29,14 @@ function SplineSceneBasic() {
     <section id="Hero">
       <Card className="w-full h-[100vh] bg-[#0A0A0A] relative overflow-hidden">
 
-        <Spotlight />
+        {!isMobile && <Spotlight />}
 
         <div className="flex h-full">
           {/* Main Content Container */}
-          <div className={`w-full flex justify-center items-center ${isLargeScreen ? 'md:w-[45%]' : 'flex justify-center items-center'} p-8 relative z-10`}>
+          <div className={`w-full flex justify-center items-center ${isLargeScreen ? 'md:w-[45%]' : 'flex justify-center items-center'} p-3 sm:p-6 md:p-8 relative z-10`}>
             {/* Left Content */}
             <motion.div
-              className="w-full max-w-lg md:max-w-xl lg:max-w-2xl text-center"
+              className="w-full max-w-sm sm:max-w-lg md:max-w-xl lg:max-w-2xl text-center"
               initial={{ opacity: 0, y: 60 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -45,8 +47,8 @@ function SplineSceneBasic() {
             >
               {/* Intro Text */}
               <motion.p
-                className="text-neutral-400 font-mono text-base sm:text-lg md:text-xl 
-               tracking-widest uppercase mb-6 md:mb-8"
+                className="text-neutral-400 font-mono text-xs sm:text-sm md:text-base lg:text-lg 
+               tracking-widest uppercase mb-3 sm:mb-4 md:mb-6 lg:mb-8 px-2"
                 style={{ letterSpacing: '0.18em' }}
               >
                 HI, I'M
@@ -54,12 +56,21 @@ function SplineSceneBasic() {
 
               {/* Gradient Title */}
               <motion.h1
-                className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black 
-               bg-clip-text text-transparent bg-gradient-to-br from-neutral-50 
-               to-neutral-400 mb-8 md:mb-10 leading-tight"
+                className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black 
+               bg-clip-text text-transparent bg-gradient-to-br from-neutral-50 via-neutral-200
+               to-neutral-400 mb-4 sm:mb-6 md:mb-8 lg:mb-10 leading-tight px-1 relative"
                 style={{
                   backgroundSize: '200% 100%',
-                  backgroundPosition: '50% 0%'
+                  backgroundPosition: '50% 0%',
+                  filter: 'drop-shadow(0 0 30px rgba(255, 255, 255, 0.1))'
+                }}
+                animate={{
+                  backgroundPosition: ['50% 0%', '100% 0%', '50% 0%']
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "easeInOut"
                 }}
               >
                 Alexandre El-Khoury
@@ -67,8 +78,8 @@ function SplineSceneBasic() {
 
               {/* Subtitle */}
               <motion.div
-                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold 
-               text-neutral-300 mb-10 md:mb-14 leading-relaxed"
+                className="text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-semibold 
+               text-neutral-300 mb-6 sm:mb-8 md:mb-10 lg:mb-14 leading-relaxed px-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{
@@ -82,7 +93,7 @@ function SplineSceneBasic() {
 
               {/* CTA Section */}
               <motion.div
-                className="mt-8 md:mt-10 w-full flex justify-center"
+                className="mt-6 sm:mt-8 md:mt-10 w-full flex justify-center"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -93,7 +104,7 @@ function SplineSceneBasic() {
                   damping: 25
                 }}
               >
-                <div className="max-w-[280px] sm:max-w-[320px]">
+                <div className="max-w-[240px] xs:max-w-[280px] sm:max-w-[320px]">
                   <ConnectButton />
                 </div>
               </motion.div>

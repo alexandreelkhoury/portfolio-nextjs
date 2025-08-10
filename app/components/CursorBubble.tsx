@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 export default function CursorBubble() {
+  const [isMobile, setIsMobile] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [isInsideHero, setIsInsideHero] = useState(false);
   const cursorX = useMotionValue(-100);
@@ -17,8 +18,16 @@ export default function CursorBubble() {
   let lastMouseY = 0;
 
   useEffect(() => {
+    // Check if device is mobile
+    const checkDevice = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
+    
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+
     const hero = document.getElementById('hero'); // Get Hero section
-    if (!hero) return;
+    if (!hero || isMobile) return;
     
     heroRef.current = hero;
 
@@ -55,12 +64,18 @@ export default function CursorBubble() {
     window.addEventListener('scroll', updateCursorOnScroll);
 
     return () => {
-      hero.removeEventListener('mousemove', moveCursor);
-      hero.removeEventListener('mouseover', handleHover);
-      hero.removeEventListener('mouseleave', handleMouseLeave);
+      if (hero && !isMobile) {
+        hero.removeEventListener('mousemove', moveCursor);
+        hero.removeEventListener('mouseover', handleHover);
+        hero.removeEventListener('mouseleave', handleMouseLeave);
+      }
+      window.removeEventListener('resize', checkDevice);
       window.removeEventListener('scroll', updateCursorOnScroll);
     };
-  }, [cursorX, cursorY, isInsideHero]);
+  }, [cursorX, cursorY, isInsideHero, isMobile]);
+
+  // Don't render on mobile devices
+  if (isMobile) return null;
 
   return (
     <motion.div

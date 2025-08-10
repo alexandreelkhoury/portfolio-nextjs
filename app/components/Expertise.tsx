@@ -77,32 +77,48 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
 
   return (
     <motion.div
-      className="relative p-12 rounded-3xl backdrop-blur-xl border border-gray-800 shadow-2xl overflow-hidden"
-      style={{ perspective: '1000px' }}
+      className="relative p-6 sm:p-8 md:p-10 lg:p-12 rounded-2xl sm:rounded-3xl backdrop-blur-xl border border-gray-800/40 shadow-2xl overflow-hidden group"
+      style={{ 
+        perspective: '1000px',
+        background: 'linear-gradient(135deg, rgba(17, 17, 17, 0.8), rgba(31, 31, 31, 0.6))',
+      }}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}  // Added
+      onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
       whileHover={{
         y: -5,
-        scale: 1.15,
-        boxShadow: "0 15px 30px rgba(0, 0, 0, 0.2)",
+        scale: typeof window !== 'undefined' && window.innerWidth >= 768 ? 1.03 : 1.01,
+        boxShadow: "0 20px 40px rgba(0, 0, 0, 0.2), 0 0 30px rgba(255, 255, 255, 0.05)",
         transition: { type: 'spring', stiffness: 400, damping: 25 }
       }}
     >
+      {/* Animated border */}
+      <div className="absolute inset-0 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-20 group-hover:opacity-40 transition-opacity duration-300" 
+           style={{ padding: '1px' }}>
+        <div className="w-full h-full rounded-2xl sm:rounded-3xl bg-transparent" />
+      </div>
+
       {/* Gradient overlay */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-br"
+        className="absolute inset-0 bg-gradient-to-br rounded-2xl sm:rounded-3xl"
         style={{
-          backgroundImage: `linear-gradient(135deg, ${skill.gradient[0]}10, ${skill.gradient[1]}20)`
+          backgroundImage: `linear-gradient(135deg, ${skill.gradient[0]}15, ${skill.gradient[1]}25)`
         }}
-        initial={{ opacity: 0.3 }}
+        initial={{ opacity: 0.2 }}
         animate={{
-          opacity: isHovered ? 0.7 : 0.3,
+          opacity: isHovered ? 0.4 : 0.2,
         }}
         transition={{
-          opacity: { duration: 0.3, ease: "easeInOut" },
-          rotate: { duration: 8, repeat: Infinity, ease: "linear" }
+          opacity: { duration: 0.4, ease: "easeInOut" },
         }}
+      />
+
+      {/* Subtle shine effect */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent rounded-2xl sm:rounded-3xl"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isHovered ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
       />
 
       {/* 3D content container */}
@@ -112,38 +128,68 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
         transition={{ type: 'spring', stiffness: 300 }}
       >
         <motion.div
-          className="mb-6 inline-block"
+          className="mb-6 sm:mb-8 flex justify-center"
           whileHover={{ scale: 1.1, rotate: 15 }}
           transition={{ type: 'spring', stiffness: 300 }}
         >
-          <div className="p-4 rounded-full bg-gray-800/50 backdrop-blur-lg">
-            {React.cloneElement(skill.icon, {
-              className: `text-3xl ${index === 0 ? 'text-green-400' : index === 1 ? 'text-blue-400' : 'text-orange-400'}`,
-            })}
+          <div className="relative">
+            {/* Glow effect */}
+            <div 
+              className="absolute inset-0 w-16 h-16 sm:w-20 sm:h-20 rounded-full blur-lg opacity-50"
+              style={{ 
+                background: `linear-gradient(135deg, ${skill.gradient[0]}, ${skill.gradient[1]})` 
+              }}
+            />
+            {/* Icon container */}
+            <div 
+              className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full backdrop-blur-lg flex items-center justify-center border border-white/10"
+              style={{
+                background: `linear-gradient(135deg, rgba(17, 17, 17, 0.9), rgba(31, 31, 31, 0.8))`
+              }}
+            >
+              {React.cloneElement(skill.icon, {
+                className: `text-2xl sm:text-3xl ${index === 0 ? 'text-green-400' : index === 1 ? 'text-blue-400' : 'text-orange-400'}`,
+              })}
+            </div>
           </div>
         </motion.div>
 
-        <h3 className="text-2xl font-bold mb-4 bg-clip-text text-transparent inline-block"
+        <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 bg-clip-text text-transparent text-center block"
           style={{ backgroundImage: `linear-gradient(45deg, ${skill.gradient[0]}, ${skill.gradient[1]})` }}>
           {skill.title}
         </h3>
 
-        <p className="text-gray-300 mb-6">
+        <p className="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base px-2">
           {skill.description}
         </p>
 
-        <div className="flex flex-wrap justify-center gap-4">
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4">
           {skill.technologies.map((tech, i) => (
             <motion.div
               key={i}
-              className="flex items-center gap-2 px-3 py-1 rounded-full bg-gray-800/50 backdrop-blur-sm"
-              whileHover={{ scale: 1.25 }}
+              className="relative flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-full backdrop-blur-sm border border-white/10 overflow-hidden group/tech"
+              style={{
+                background: 'linear-gradient(135deg, rgba(17, 17, 17, 0.8), rgba(31, 31, 31, 0.6))'
+              }}
+              whileHover={{ 
+                scale: typeof window !== 'undefined' && window.innerWidth >= 768 ? 1.1 : 1.05,
+                y: -2
+              }}
               transition={{ type: 'spring', stiffness: 400 }}
             >
-              {React.cloneElement(tech.icon, {
-                className: `text-lg ${index === 0 ? 'text-green-400' : index === 1 ? 'text-blue-400' : 'text-orange-400'}`,
-              })}
-              <span className="text-sm font-medium text-gray-300">{tech.name}</span>
+              {/* Subtle glow on hover */}
+              <div 
+                className="absolute inset-0 rounded-full opacity-0 group-hover/tech:opacity-30 transition-opacity duration-300"
+                style={{ 
+                  background: `linear-gradient(135deg, ${skill.gradient[0]}20, ${skill.gradient[1]}30)` 
+                }}
+              />
+              <div className="relative z-10 flex items-center gap-1 sm:gap-2">
+                {React.cloneElement(tech.icon, {
+                  className: `text-sm sm:text-base md:text-lg ${index === 0 ? 'text-green-400' : index === 1 ? 'text-blue-400' : 'text-orange-400'}`,
+                })}
+                <span className="text-xs sm:text-sm font-medium text-gray-200">{tech.name}</span>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -241,12 +287,12 @@ export default function Expertise() {
   };
 
   return (
-    <section id="expertise" className="relative pt-10 overflow-visible z-30">
+    <section id="expertise" className="relative pt-10 pb-16 sm:pb-20 overflow-visible z-30">
       {/* <CursorGlow /> */}
 
       {/* Animated logo background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0A] via-[#0A0A0A] to-[#0A0A0A] overflow-hidden">
-        {isClient && [...Array(15)].map((_, i) => {
+        {isClient && [...Array(typeof window !== 'undefined' && window.innerWidth >= 768 ? 15 : 8)].map((_, i) => {
           const IconComponent = fallingIcons[Math.floor(Math.random() * fallingIcons.length)];
           const category = blockchainIcons.includes(IconComponent) ? 'blockchain'
             : frontendIcons.includes(IconComponent) ? 'frontend'
@@ -298,11 +344,11 @@ export default function Expertise() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-8 sm:mb-12 text-transparent 
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold mb-6 sm:mb-8 md:mb-12 text-transparent 
        bg-gradient-to-br from-neutral-300 to-neutral-500
-       bg-clip-text inline-block w-fit relative"> {/* Added relative here */}
+       bg-clip-text inline-block w-fit relative px-2"> {/* Added relative here */}
               Technical Expertise
-              <div className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 mx-auto h-1 
+              <div className="absolute -bottom-1 sm:-bottom-2 md:-bottom-3 left-0 right-0 mx-auto h-0.5 sm:h-1 
             bg-gradient-to-r from-neutral-300 via-neutral-500 to-neutral-700 
             rounded-full" />
             </h2>
@@ -311,7 +357,7 @@ export default function Expertise() {
         {/* from-[#05df72] via-[#3B82F6] to-[#ff8904] */}
 
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 py-10 sm:py-20"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 py-8 sm:py-12 md:py-16"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -330,7 +376,7 @@ export default function Expertise() {
 
 
 
-        <div id='timeline' className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-7 pt-14 overflow-hidden">
+        <div id='timeline' className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-7 pt-12 sm:pt-16 overflow-hidden">
           <div className="flex justify-center relative px-4 sm:px-6 lg:px-8">
             <motion.div
               className="relative"
@@ -339,12 +385,12 @@ export default function Expertise() {
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold sm:mb-12 text-transparent 
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold mb-6 sm:mb-8 md:mb-12 text-transparent 
        bg-gradient-to-r from-neutral-300 to-neutral-500 
-       bg-clip-text inline-block w-fit relative">
+       bg-clip-text inline-block w-fit relative px-2">
                 My Journey
                 <div
-                  className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 mx-auto h-1 
+                  className="absolute -bottom-1 sm:-bottom-2 md:-bottom-3 left-0 right-0 mx-auto h-0.5 sm:h-1 
         bg-gradient-to-r from-neutral-300 via-neutral-500 to-neutral-700 
         rounded-full"
                 />
@@ -379,11 +425,11 @@ export default function Expertise() {
                 >
                   {/* Content Card */}
                   <motion.div
-                    className={`w-full sm:w-5/6 md:w-2/3 p-4 sm:p-6 rounded-3xl shadow-2xl relative z-20 backdrop-blur-lg border border-gray-800 overflow-visible ${index % 2 === 0 ? 'ml-4 sm:ml-8' : 'mr-4 sm:mr-8'}`}
+                    className={`w-full sm:w-5/6 md:w-2/3 p-3 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl shadow-2xl relative z-20 backdrop-blur-lg border border-gray-800 overflow-visible ${index % 2 === 0 ? 'ml-2 sm:ml-4 md:ml-8' : 'mr-2 sm:mr-4 md:mr-8'}`}
                     style={{ perspective: '1000px' }}
                     whileHover={{
-                      scale: 1.02,
-                      boxShadow: "0 15px 30px rgba(0, 0, 0, 0.1)"
+                      scale: typeof window !== 'undefined' && window.innerWidth >= 768 ? 1.01 : 1.005,
+                      boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)"
                     }}
                     transition={{ type: 'spring', stiffness: 300 }}
                   >
