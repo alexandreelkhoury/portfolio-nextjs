@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Hero from './components/Hero';
 import DemoHeroGeometric from './components/DemoHeroGeometric';
-import Projects from './components/Projects';
+import ProjectsShowcase from './components/ProjectsShowcase';
 import Expertise from './components/Expertise';
 import Loader from './components/Loader';
 import SplineSceneBasic from './components/Robot';
@@ -54,7 +54,7 @@ export default function Home() {
         <SplineSceneBasic />
         {/* <Hero /> */}
         <Expertise />
-        <Projects />
+        <ProjectsShowcase />
         {/* <TimelineDemo/> */}
         
       </main>
