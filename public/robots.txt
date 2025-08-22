@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://portfolio-nextjs--portfolio-software-engineer.europe-west4.hosted.app/sitemap.xml
