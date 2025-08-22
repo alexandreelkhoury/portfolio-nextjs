@@ -14,10 +14,5 @@ const nextConfig : NextConfig = {
     ],
   },
 };
-// next.config.js
-module.exports = {
-  images: {
-    domains: ['assets.aceternity.com'],
-  },
-}
+
 export default nextConfig;

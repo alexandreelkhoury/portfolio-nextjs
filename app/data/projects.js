@@ -1,6 +1,6 @@
 const projects = [
   {
-    img: '/images/SplTokenLauncher.png',
+    img: '/images/splTokenLauncher.png',
     title: 'SPL Token Launcher',
     description: 'Decentralized platform for creating and launching SPL tokens on Solana blockchain with built-in liquidity management.',
     url: 'https://spltokenlauncher.pro',
@@ -8,7 +8,7 @@ const projects = [
     tech: ['React', 'Node.js', 'Solana', 'IPFS', 'DeFi'],
   },
   {
-    img: '/images/HireWise.png',
+    img: '/images/Hirewise.png',
     title: 'HireWise',
     description: 'AI-powered recruitment platform that streamlines the hiring process with intelligent candidate matching and automated screening.',
     url: 'https://hirewise.web.app',
@@ -18,7 +18,7 @@ const projects = [
   {
     img: '/images/tipMe.png',
     title: 'TipMe',
-    description: 'Blockchain-powered tipping platform with cryptocurrency payments and smart contract integration for secure transactions.',
+    description: 'TipMe is a crypto tipping platform on Base network for instant ETH and USDC tips with ultra-low fees.',
     url: 'https://tipme-616b3.web.app/',
     github: 'https://github.com/alexdev/',
     tech: ['React', 'Blockchain', 'Coinbase', 'Solidity'],

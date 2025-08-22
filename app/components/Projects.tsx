@@ -3,7 +3,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import projects from '../data/projects';
-import TimelineDemo from './ProjectsData'; // Adjust the path as necessary
+// import TimelineDemo from './ProjectsData'; // Removed - using TimelineModern instead
 
 interface Project {
   img: string;
@@ -48,7 +48,7 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
     <motion.div
       ref={ref}
       style={{ y, opacity }}
-      className="group relative h-[280px] xs:h-[320px] sm:h-[380px] md:h-[420px] lg:h-[480px] rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-b from-white/5 to-transparent transition-all duration-300 hover:border-white/20"
+      className="group relative h-[300px] xs:h-[340px] sm:h-[380px] md:h-[420px] lg:h-[480px] rounded-xl sm:rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-b from-white/5 to-transparent transition-all duration-300 hover:border-white/20"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       whileHover={{ 

@@ -8,7 +8,7 @@ import Loader from './components/Loader';
 import SplineSceneBasic from './components/Robot';
 import ScrollToTop from './components/ScrollToTop';
 import { User, Briefcase, FileText } from 'lucide-react'
-import TimelineDemo from './components/ProjectsData';
+import TimelineModern from './components/TimelineModern';
 import { NavBar } from "@/components/ui/tubelight-navbar"
 
 export default function Home() {
@@ -55,7 +55,7 @@ export default function Home() {
         {/* <Hero /> */}
         <Expertise />
         <ProjectsShowcase />
-        {/* <TimelineDemo/> */}
+        <TimelineModern />
         
       </main>
     </div>

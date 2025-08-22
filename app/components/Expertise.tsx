@@ -28,9 +28,6 @@ import {
   SiEthers
 } from 'react-icons/si';
 import CursorGlow from './CursorGlow';
-import { Briefcase, GraduationCap } from 'lucide-react';
-import { timelineData } from '../data/timeline';
-import { useRef } from 'react';
 
 interface Skill {
   id: number;
@@ -199,12 +196,6 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
 };
 
 export default function Expertise() {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref, // Reference to the timeline container
-    offset: ["start end", "end start"] // Track scroll within the container
-  });
-  const pathHeight = useTransform(scrollYProgress, [0.15, 0.8], ['0%', '100%']);
 
   const [isClient, setIsClient] = useState(false);
 
@@ -287,7 +278,7 @@ export default function Expertise() {
   };
 
   return (
-    <section id="expertise" className="relative pt-10 pb-16 sm:pb-20 overflow-visible z-30">
+    <section id="expertise" className="relative pt-10 pb-8 sm:pb-12 overflow-visible z-30">
       {/* <CursorGlow /> */}
 
       {/* Animated logo background */}
@@ -376,98 +367,6 @@ export default function Expertise() {
 
 
 
-        <div id='timeline' className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-7 pt-12 sm:pt-16 overflow-hidden">
-          <div className="flex justify-center relative px-4 sm:px-6 lg:px-8">
-            <motion.div
-              className="relative"
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold mb-6 sm:mb-8 md:mb-12 text-transparent 
-       bg-gradient-to-r from-neutral-300 to-neutral-500 
-       bg-clip-text inline-block w-fit relative px-2">
-                My Journey
-                <div
-                  className="absolute -bottom-1 sm:-bottom-2 md:-bottom-3 left-0 right-0 mx-auto h-0.5 sm:h-1 
-        bg-gradient-to-r from-neutral-300 via-neutral-500 to-neutral-700 
-        rounded-full"
-                />
-              </h2>
-            </motion.div>
-          </div>
-
-          <div ref={ref} className="relative pt-20 sm:pt-30 pb-30">
-            {/* Timeline Path */}
-            <motion.div
-              className="absolute left-1/2 -translate-x-1/2 w-1 h-full rounded-full bg-gradient-to-b from-indigo-300 via-indigo-500 to-indigo-700 z-0"
-              style={{ height: pathHeight }}
-              transition={{ duration: 1.5, ease: "circInOut" }} // Slower animation
-            />
-
-            {/* Cards Container */}
-            <div className="relative z-10 space-y-16">
-              {timelineData.map((item, index) => (
-                <motion.div
-                  key={index}
-                  className={`flex items-center ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}
-                  initial={{ opacity: 0, x: index % 2 === 0 ? -100 : 100 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.3 }} // Trigger earlier
-                  transition={{
-                    duration: 0.6,
-                    delay: index * 0.1,
-                    type: 'spring',
-                    stiffness: 200,
-                    damping: 25
-                  }}
-                >
-                  {/* Content Card */}
-                  <motion.div
-                    className={`w-full sm:w-5/6 md:w-2/3 p-3 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl shadow-2xl relative z-20 backdrop-blur-lg border border-gray-800 overflow-visible ${index % 2 === 0 ? 'ml-2 sm:ml-4 md:ml-8' : 'mr-2 sm:mr-4 md:mr-8'}`}
-                    style={{ perspective: '1000px' }}
-                    whileHover={{
-                      scale: typeof window !== 'undefined' && window.innerWidth >= 768 ? 1.01 : 1.005,
-                      boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)"
-                    }}
-                    transition={{ type: 'spring', stiffness: 300 }}
-                  >
-                    <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-gray-800/50 backdrop-blur-lg shadow-lg flex items-center justify-center">
-                      <motion.div
-                        className="w-8 h-8 rounded-full bg-[#5F6BEB] flex items-center justify-center"
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.6 }}
-                      >
-                        {item.icon === 'work' ?
-                          <Briefcase className="w-5 h-5 text-white" /> :
-                          <GraduationCap className="w-5 h-5 text-white" />
-                        }
-                      </motion.div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="px-4 py-2 rounded-full text-sm font-medium bg-gray-800/50 backdrop-blur-lg text-white">
-                          {item.year}
-                        </span>
-                        <span className="font-semibold text-base md:text-lg text-[#8EBAFF] 
-                        hover:text-[#6366F1] transition-colors duration-200">
-                          {item.company}
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-bold bg-clip-text text-transparent"
-                        style={{ backgroundImage: 'linear-gradient(45deg, #6366F1, #10B981)' }}>
-                        {item.title}
-                      </h3>
-                      <p className="text-gray-300 leading-relaxed">{item.description}</p>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
 
     </section>

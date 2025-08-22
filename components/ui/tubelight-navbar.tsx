@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -16,9 +16,46 @@ interface NavBarProps {
 
 export function NavBar({ items }: NavBarProps) {
   const [activeTab, setActiveTab] = useState(items[0].name)
+  const [isVisible, setIsVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
+
+  useEffect(() => {
+    const controlNavbar = () => {
+      if (typeof window !== 'undefined') {
+        const currentScrollY = window.scrollY
+        
+        // Show navbar when at top of page
+        if (currentScrollY < 10) {
+          setIsVisible(true)
+        }
+        // Hide when scrolling down, show when scrolling up
+        else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+          setIsVisible(false)
+        } else if (currentScrollY < lastScrollY) {
+          setIsVisible(true)
+        }
+        
+        setLastScrollY(currentScrollY)
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', controlNavbar)
+      return () => window.removeEventListener('scroll', controlNavbar)
+    }
+  }, [lastScrollY])
 
   return (
-    <div
+    <motion.div
+      initial={{ y: 0, opacity: 1 }}
+      animate={{ 
+        y: isVisible ? 0 : -100, 
+        opacity: isVisible ? 1 : 0 
+      }}
+      transition={{ 
+        duration: 0.3, 
+        ease: "easeInOut" 
+      }}
       className={cn(
         "fixed top-2 sm:top-3 left-1/2 -translate-x-1/2 z-50 mb-6 w-[90%] sm:w-auto max-w-[380px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-none",
       )}
@@ -68,6 +105,6 @@ export function NavBar({ items }: NavBarProps) {
           )
         })}
       </div>
-    </div>
+    </motion.div>
   )
 }

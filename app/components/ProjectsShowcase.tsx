@@ -98,10 +98,10 @@ const ProjectsShowcase = () => {
   };
 
   return (
-    <section id="projects" className="bg-[#0A0A0A] min-h-screen py-16 sm:py-20 relative overflow-hidden">
+    <section id="projects" className="bg-[#0A0A0A] py-4 sm:py-8 pb-0 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 h-full">
         {/* Section Title */}
-        <div className="text-center mb-12 sm:mb-16">
+        <div className="text-center mb-8 sm:mb-12">
           <motion.h2
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
