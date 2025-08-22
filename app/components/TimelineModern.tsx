@@ -78,9 +78,7 @@ const TimelineCard = ({ item, index }: { item: TimelineItem; index: number }) =>
       <motion.div
         whileHover={{ y: -5, scale: 1.02 }}
         transition={{ duration: 0.3 }}
-        className={`flex-1 max-w-2xl ${
-          isEven ? 'text-left' : 'text-right md:text-left'
-        }`}
+        className="flex-1 max-w-2xl text-left"
       >
         <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm border border-white/10 rounded-2xl p-6 md:p-8 hover:border-white/20 transition-all duration-500 relative overflow-hidden">
           

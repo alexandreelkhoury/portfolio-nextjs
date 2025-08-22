@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig : NextConfig = {
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
@@ -11,7 +12,7 @@ const nextConfig : NextConfig = {
       },
     ],
   },
-  // Remove output: 'export' and unoptimized: true for Firebase App Hosting compatibility
+  outputFileTracingRoot: process.cwd(),
 };
 
 export default nextConfig;
