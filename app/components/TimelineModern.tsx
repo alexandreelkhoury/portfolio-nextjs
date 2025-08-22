@@ -2,7 +2,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import Image from 'next/image';
-import { timelineData } from '../data/timeline';
+import { timelineData } from '../data/timeline.js';
 
 interface TimelineItem {
   year: string;
