@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig : NextConfig = {
-  output: 'export',
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -13,6 +11,7 @@ const nextConfig : NextConfig = {
       },
     ],
   },
+  // Remove output: 'export' and unoptimized: true for Firebase App Hosting compatibility
 };
 
 export default nextConfig;
