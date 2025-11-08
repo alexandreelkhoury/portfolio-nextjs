@@ -1,6 +1,13 @@
 export const timelineData = [
     {
-        year: 'Oct 2024 - Present',
+        year: 'Oct 2025 - Present',
+        title: 'Full Stack & Blockchain Developer',
+        company: 'Sovra',
+        description: 'Developed mobile-first interfaces with account abstraction and gasless transactions, built RESTful APIs, integrated DeFi protocols like Aave, and managed development and production environments for a retail-focused decentralized savings platform.',
+        icon: 'work'
+    },
+    {
+        year: 'Oct 2024 - Sep 2025',
         title: 'Fullstack Developer',
         company: 'Freelance',
         description: 'CTO and lead developer for SplTokenLauncher (Solana token launch platform) and HireWise (AI-powered recruitment solution).',

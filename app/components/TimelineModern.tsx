@@ -27,6 +27,7 @@ const TimelineCard = ({ item, index }: { item: TimelineItem; index: number }) =>
 
   const getCompanyLogo = (company: string) => {
     const logoMap: { [key: string]: string } = {
+      'Sovra': '/images/sovra-logo.svg',
       'Metav.rs': '/images/logo-metav.rs.jpg',
       'Ambrosia': '/images/ambrosia-logo.jpeg',
       'ESGI': '/images/ESGI-logo.jpeg',

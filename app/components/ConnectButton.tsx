@@ -191,7 +191,7 @@ const ConnectButton = () => {
                 </motion.button>
             </div>
 
-            {/* Enhanced Modern Modal */}
+            {/* Modal */}
             <AnimatePresence>
                 {isModalOpen && (
                     <motion.div
@@ -199,83 +199,62 @@ const ConnectButton = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.4 }}
+                        transition={{ duration: 0.3 }}
                         onClick={closeModal}
                     >
-                        {/* Cosmic Backdrop */}
+                        {/* Backdrop */}
                         <motion.div
-                            className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900"
+                            className="absolute inset-0 bg-black/70 backdrop-blur-xl"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                        >
-                            {/* Animated Starfield */}
-                            {[...Array(50)].map((_, i) => (
-                                <motion.div
-                                    key={i}
-                                    className="absolute w-0.5 h-0.5 bg-white rounded-full"
-                                    style={{
-                                        left: `${Math.random() * 100}%`,
-                                        top: `${Math.random() * 100}%`
-                                    }}
-                                    animate={{
-                                        opacity: [0, 0.8, 0],
-                                        scale: [0, 1, 0]
-                                    }}
-                                    transition={{
-                                        duration: 2 + Math.random() * 3,
-                                        repeat: Infinity,
-                                        delay: Math.random() * 2
-                                    }}
-                                />
-                            ))}
-                        </motion.div>
+                        />
 
                         {/* Modal Content */}
                         <motion.div
-                            className="relative z-10 rounded-2xl p-8 md:p-10 w-full max-w-md mx-4 
-                           border border-purple-900/50 backdrop-blur-2xl
-                           bg-gradient-to-br from-gray-800/90 to-gray-900/90
-                           shadow-2xl shadow-purple-900/30"
+                            className="relative z-10 rounded-2xl p-8 md:p-10 w-full max-w-md mx-4
+                           border border-white/10 backdrop-blur-xl
+                           shadow-2xl shadow-black/20"
+                            style={{
+                                background: 'linear-gradient(135deg, rgba(17, 17, 17, 0.9), rgba(31, 31, 31, 0.8))'
+                            }}
                             initial={{
-                                scale: 0.95,
+                                scale: 0.9,
                                 opacity: 0,
-                                y: 20
+                                y: 50
                             }}
                             animate={{
                                 scale: 1,
                                 opacity: 1,
                                 y: 0,
                                 transition: {
-                                    type: 'spring',
-                                    stiffness: 30,
-                                    damping: 20
+                                    duration: 0.4,
+                                    ease: 'easeInOut'
                                 }
                             }}
                             exit={{
-                                scale: 0.95,
+                                scale: 0.9,
                                 opacity: 0,
-                                y: 20,
+                                y: 50,
                                 transition: {
-                                    duration: 0.2,
-                                    ease: "easeIn"
+                                    duration: 0.3,
+                                    ease: 'easeIn'
                                 }
                             }}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            {/* Holographic Close Button */}
+                            {/* Close Button */}
                             <motion.button
-                                className="absolute top-3 right-3 p-1 rounded-full cursor-pointer
-                             hover:bg-purple-900/20 transition-all duration-300 
-                             flex items-center justify-center w-8 h-8 overflow-visible
-                             border-2 border-purple-400/30 hover:border-purple-400/50"
+                                className="absolute top-4 right-4 p-2 rounded-full cursor-pointer
+                             hover:bg-white/10 transition-all duration-200
+                             flex items-center justify-center w-8 h-8
+                             border border-white/10 hover:border-white/20"
                                 onClick={closeModal}
-                                whileHover={{ scale: 1.1, rotate: 90 }}
-                                whileTap={{ scale: 0.9 }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                             >
-                                <div className="absolute inset-0 rounded-full" />
                                 <svg
-                                    className="w-5 h-5 text-purple-400 hover:text-purple-300 transition-colors"
+                                    className="w-4 h-4 text-neutral-400 hover:text-neutral-300 transition-colors"
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     stroke="currentColor"
@@ -289,94 +268,72 @@ const ConnectButton = () => {
                                 </svg>
                             </motion.button>
 
-                            {/* Nebula Header */}
+                            {/* Header */}
                             <motion.div
-                                className="mb-10 text-center"
-                                initial={{ filter: 'blur(20px)', opacity: 0 }}
-                                animate={{ filter: 'blur(0px)', opacity: 1 }}
-                                transition={{ duration: 0.6 }}
+                                className="mb-8 text-center"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, delay: 0.1 }}
                             >
-                                <h3 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent 
-                                 bg-gradient-to-r from-purple-400 to-indigo-400">
-                                    Let's Connect!
+                                <h3 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent
+                                 bg-gradient-to-r from-neutral-300 to-neutral-500">
+                                    Let's Connect
                                 </h3>
-                                <div className="mt-4 h-1 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 
+                                <div className="mt-4 h-0.5 sm:h-1 bg-gradient-to-r from-neutral-300 via-neutral-500 to-neutral-700
                                   rounded-full w-3/4 mx-auto" />
                             </motion.div>
 
-                            {/* Quantum Interface Buttons */}
-                            <div className="space-y-6">
-                                {/* Email Portal */}
+                            {/* Contact Options */}
+                            <div className="space-y-4">
+                                {/* Email */}
                                 <motion.a
                                     href="mailto:alexkhoury@hotmail.com"
-                                    className="group relative flex items-center px-6 py-5 
-                                 bg-gray-800 hover:bg-gray-700/80 rounded-xl
-                                 border border-purple-900/30 hover:border-purple-900/50
-                                 shadow-lg hover:shadow-xl transition-all duration-300"
-                                    whileHover={{ scale: 1.02 }}
+                                    className="group relative flex items-center px-6 py-4
+                                 backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-2xl
+                                 border border-white/10 hover:border-white/20
+                                 shadow-lg transition-all duration-200"
+                                    whileHover={{ y: -2 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                >
+                                    <div className="relative z-10 flex items-center w-full">
+                                        <SiGmail className="w-6 h-6 mr-4 text-neutral-400 group-hover:text-[#EA4335] transition-colors duration-200" />
+                                        <div className="text-left">
+                                            <p className="font-semibold text-neutral-300">Email</p>
+                                            <p className="text-sm text-neutral-400">alexkhoury@hotmail.com</p>
+                                        </div>
+                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent
+                                     opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+                                </motion.a>
+
+                                {/* LinkedIn */}
+                                <motion.a
+                                    href="https://www.linkedin.com/in/alexandre-khoury/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative flex items-center px-6 py-4
+                                 backdrop-blur-sm bg-white/5 hover:bg-white/10 rounded-2xl
+                                 border border-white/10 hover:border-white/20
+                                 shadow-lg transition-all duration-200"
+                                    whileHover={{ y: -2 }}
                                     whileTap={{ scale: 0.98 }}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.3 }}
                                 >
-                                    <div className="relative z-10 flex items-center">
-                                        <SiGmail className="w-8 h-8 mr-4 text-purple-400" />
+                                    <div className="relative z-10 flex items-center w-full">
+                                        <SiLinkedin className="w-6 h-6 mr-4 text-neutral-400 group-hover:text-[#0A66C2] transition-colors duration-200" />
                                         <div className="text-left">
-                                            <p className="font-semibold text-gray-200">E-Mail</p>
-                                            <p className="text-sm text-purple-300/80">alexkhoury@hotmail.com</p>
+                                            <p className="font-semibold text-neutral-300">LinkedIn</p>
+                                            <p className="text-sm text-neutral-400">alexandre-khoury</p>
                                         </div>
                                     </div>
-                                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent 
-                                     opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent
+                                     opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
                                 </motion.a>
-
-                                {/* LinkedIn Wormhole */}
-                                <motion.a
-                                    href="https://www.linkedin.com/in/alexandre-khoury/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="group relative flex items-center px-6 py-5 
-                                 bg-gradient-to-br from-purple-600 to-indigo-600 hover:to-indigo-500
-                                 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.4 }}
-                                >
-                                    <div className="relative z-10 flex items-center">
-                                        <SiLinkedin className="w-8 h-8 mr-4 text-white" />
-                                        <div className="text-left">
-                                            <p className="font-semibold text-white">LinkedIn</p>
-                                            <p className="text-sm text-indigo-100/80">in/alexandre-khoury</p>
-                                        </div>
-                                    </div>
-                                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent 
-                                     opacity-0 group-hover:opacity-30 transition-opacity" />
-                                </motion.a>
-                            </div>
-
-                            {/* Dark Matter Particles */}
-                            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                                {[...Array(15)].map((_, i) => (
-                                    <motion.div
-                                        key={i}
-                                        className="absolute w-1 h-1 bg-purple-400/10 rounded-full"
-                                        style={{
-                                            left: `${Math.random() * 100}%`,
-                                            top: `${Math.random() * 100}%`
-                                        }}
-                                        animate={{
-                                            scale: [0, 1.5, 0],
-                                            opacity: [0, 0.3, 0]
-                                        }}
-                                        transition={{
-                                            duration: 4 + Math.random() * 4,
-                                            repeat: Infinity,
-                                            delay: Math.random() * 2
-                                        }}
-                                    />
-                                ))}
                             </div>
                         </motion.div>
                     </motion.div>
