@@ -47,8 +47,16 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
   useEffect(() => {
     const check = () => setIsDesktop(window.innerWidth >= 768);
     check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const debouncedCheck = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(check, 150);
+    };
+    window.addEventListener('resize', debouncedCheck);
+    return () => {
+      window.removeEventListener('resize', debouncedCheck);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -246,14 +254,12 @@ export default function Expertise() {
     hidden: {
       opacity: 0,
       y: 50,
-      scale: 0.8,
-      rotate: 10
+      scale: 0.9,
     },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      rotate: 0,
       transition: {
         type: 'spring',
         stiffness: 300,
@@ -264,8 +270,8 @@ export default function Expertise() {
   };
 
   return (
-    <section id="expertise" className="relative pt-10 pb-8 sm:pb-12 overflow-visible z-30 bg-[var(--bg-surface)]">
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-7 pt-14">
+    <section id="expertise" className="relative py-16 sm:py-24 overflow-visible z-30 bg-[var(--bg-surface)]">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-center relative px-4 sm:px-6 lg:px-8">
           <motion.div
             className="relative"

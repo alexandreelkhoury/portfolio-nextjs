@@ -10,15 +10,20 @@ const ConnectButton = () => {
     if (isModalOpen) {
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'none';
+
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') closeModal();
+      };
+      window.addEventListener('keydown', handleEscape);
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.touchAction = '';
+        window.removeEventListener('keydown', handleEscape);
+      };
     } else {
       document.body.style.overflow = '';
       document.body.style.touchAction = '';
     }
-
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.touchAction = '';
-    };
   }, [isModalOpen]);
 
   const mouseX = useMotionValue(0.5);

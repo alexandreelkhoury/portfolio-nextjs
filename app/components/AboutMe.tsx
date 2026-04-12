@@ -140,7 +140,7 @@ export default function AboutMe() {
 
               <div className="mt-8 pt-6 border-t border-white/10">
                 <p className="text-neutral-500 text-sm">
-                  Math degree from Universit&eacute; de Paris &middot; Master's in Blockchain Engineering from ESGI
+                  Math degree from Université de Paris · Master's in Blockchain Engineering from ESGI
                 </p>
               </div>
             </div>

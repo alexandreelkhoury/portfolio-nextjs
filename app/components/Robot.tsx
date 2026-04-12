@@ -133,9 +133,7 @@ function SplineSceneBasic() {
                   damping: 25
                 }}
               >
-                <div className="max-w-[240px] xs:max-w-[280px] sm:max-w-[320px]">
-                  <ConnectButton />
-                </div>
+                <ConnectButton />
               </motion.div>
             </motion.div>
           </div>

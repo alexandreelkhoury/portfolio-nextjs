@@ -1,25 +1,42 @@
 'use client';
 import { motion, AnimatePresence, PanInfo, useReducedMotion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import projects from '../data/projects';
 
 const ProjectsShowcase = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
-  // Auto-advance projects every 8 seconds (optional)
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+
+  const nextProject = useCallback(() => {
+    setDirection(1);
+    setCurrentIndex((prev) => (prev + 1) % projects.length);
+  }, []);
+
+  const prevProject = useCallback(() => {
+    setDirection(-1);
+    setCurrentIndex((prev) => (prev - 1 + projects.length) % projects.length);
+  }, []);
+
+  // Auto-advance projects every 8 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       nextProject();
     }, 8000);
     return () => clearInterval(timer);
-  }, [currentIndex]);
+  }, [currentIndex, nextProject]);
 
-  // Keyboard navigation
+  // Keyboard navigation (only when no input is focused)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      const tag = (event.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
       if (event.key === 'ArrowLeft') {
         prevProject();
       } else if (event.key === 'ArrowRight') {
@@ -29,17 +46,7 @@ const ProjectsShowcase = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  const nextProject = () => {
-    setDirection(1);
-    setCurrentIndex((prev) => (prev + 1) % projects.length);
-  };
-
-  const prevProject = () => {
-    setDirection(-1);
-    setCurrentIndex((prev) => (prev - 1 + projects.length) % projects.length);
-  };
+  }, [nextProject, prevProject]);
 
   const goToProject = (index: number) => {
     setDirection(index > currentIndex ? 1 : -1);
@@ -90,8 +97,8 @@ const ProjectsShowcase = () => {
   };
 
   return (
-    <section id="projects" className="bg-[var(--bg-surface)] py-4 sm:py-8 pb-0 relative overflow-hidden">
-      <div className="container mx-auto px-4 sm:px-6 h-full">
+    <section id="projects" className="bg-[var(--bg-surface)] py-16 sm:py-24 relative overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         {/* Section Title */}
         <div className="text-center mb-8 sm:mb-12">
           <motion.h2
@@ -171,16 +178,18 @@ const ProjectsShowcase = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                   </div>
 
-                  {/* Drag Hint */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                    <motion.div
-                      animate={{ opacity: [0.5, 1, 0.5] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="text-white/60 text-xs flex items-center gap-2"
-                    >
-                      Drag to navigate
-                    </motion.div>
-                  </div>
+                  {/* Drag Hint (touch devices only) */}
+                  {isTouchDevice && (
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                      <motion.div
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="text-white/60 text-xs flex items-center gap-2"
+                      >
+                        Swipe to navigate
+                      </motion.div>
+                    </div>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>

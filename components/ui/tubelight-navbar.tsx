@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useCallback, useRef } from "react"
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -21,10 +21,10 @@ export function NavBar({ items }: NavBarProps) {
   const isClickScrolling = useRef(false)
 
   // Map nav item names to their section IDs
-  const sectionIds = items.map((item) => {
+  const sectionIds = useMemo(() => items.map((item) => {
     if (item.url === '#') return 'Hero'
     return item.url.replace('#', '')
-  })
+  }), [items])
 
   const updateActiveSection = useCallback(() => {
     if (isClickScrolling.current) return

@@ -109,144 +109,6 @@ html {
   box-sizing: inherit;
 }
 
-.projects-section {
-  position: relative;
-  z-index: 20;
-  background: var(--background);
-  border: 1px solid rgba(var(--foreground-rgb), 0.1);
-  border-radius: 12px;
-  margin: 0 auto;
-  padding: 2rem;
-  max-width: 1200px;
-}
-
-.projects-section h2 {
-  color: var(--foreground);
-  font-size: 2.5rem;
-  margin-bottom: 2rem;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes gradient-pulse {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.conic-flash {
-  animation: gradient-pulse 4s ease infinite;
-}
-
-.cursor-3d {
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-}
-
-.transition-container {
-  position: relative;
-  min-height: 100vh;
-}
-
-.content {
-  position: relative;
-  z-index: 1;
-  transition: opacity 0.8s ease-in-out, visibility 0.5s ease-in-out; /* Smooth transition */
-}
-
-.hidden {
-  visibility: hidden;
-  opacity: 0;
-}
-
-.visible {
-  visibility: visible;
-  opacity: 1;
-}
-
-.loader-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw; /* Full width */
-  height: 100vh; /* Full height */
-  inset: 0;
-  background: var(--bg-surface);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-
-.spinner {
-  width: 140.8px;  /* Doubled size */
-  height: 140.8px; /* Doubled size */
-  --clr: rgb(125, 68, 201);
-  --clr-alpha: rgba(154, 63, 228, 0.1);
-  animation: spinner 1.6s infinite ease;
-  transform-style: preserve-3d;
-
-}
-
-.spinner > div {
-  background-color: var(--clr-alpha);
-  height: 100%;
-  position: absolute;
-  width: 100%;
-  border: 7px solid var(--clr); /* Doubled border width */
-}
-
-.spinner div:nth-of-type(1) {
-  transform: translateZ(-70.4px) rotateY(180deg); /* Doubled translateZ */
-}
-
-.spinner div:nth-of-type(2) {
-  transform: rotateY(-270deg) translateX(50%);
-  transform-origin: top right;
-}
-
-.spinner div:nth-of-type(3) {
-  transform: rotateY(270deg) translateX(-50%);
-  transform-origin: center left;
-}
-
-.spinner div:nth-of-type(4) {
-  transform: rotateX(90deg) translateY(-50%);
-  transform-origin: top center;
-}
-
-.spinner div:nth-of-type(5) {
-  transform: rotateX(-90deg) translateY(50%);
-  transform-origin: bottom center;
-}
-
-.spinner div:nth-of-type(6) {
-  transform: translateZ(70.4px); /* Doubled translateZ */
-}
-
-@keyframes spinner {
-  0% {
-    transform: rotate(45deg) rotateX(-25deg) rotateY(25deg);
-  }
-
-  50% {
-    transform: rotate(45deg) rotateX(-385deg) rotateY(25deg);
-  }
-
-  100% {
-    transform: rotate(45deg) rotateX(-385deg) rotateY(385deg);
-  }
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -256,7 +118,7 @@ html {
   }
 }
 
-/* Reduced motion for ALL users who prefer it (not just mobile) */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -266,61 +128,30 @@ html {
   }
 }
 
-/* Mobile-specific optimizations */
+/* Mobile optimizations */
 @media (max-width: 768px) {
-  
-  /* Optimize touch interactions */
   * {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
-  
-  /* Improve text selection on mobile */
+
   p, span, h1, h2, h3, h4, h5, h6 {
     -webkit-user-select: text;
     user-select: text;
   }
-  
-  /* Ensure text is readable on mobile */
+
   body {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
-  
-  /* Improve scrolling on mobile */
+
   html {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   }
 }
 
-/* Extra small screens */
-@media (max-width: 475px) {
-  .projects-section {
-    margin: 0 1rem 2rem 1rem;
-    padding: 1rem;
-  }
-  
-  .projects-section h2 {
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
-  }
-}
-
-/* Enhanced glassmorphism effect */
-.glass-card {
-  background: linear-gradient(135deg, rgba(17, 17, 17, 0.8), rgba(31, 31, 31, 0.6));
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-.glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 255, 255, 0.05);
-}
-
-/* Improved scroll bar styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -338,45 +169,7 @@ html {
   background: linear-gradient(135deg, #B8B8B8, #D4D4D4);
 }
 
-/* Custom glow animation */
-@keyframes glow-pulse {
-  0%, 100% { 
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-  }
-  50% { 
-    box-shadow: 0 0 40px rgba(16, 185, 129, 0.6);
-  }
-}
-
-.glow-green {
-  animation: glow-pulse 3s ease-in-out infinite;
-}
-
-/* Enhanced text shadows */
-.text-glow {
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-}
-
-/* Improved button hover effects */
-.btn-glass {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.btn-glass:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
-
-/* Custom text overflow utilities */
-.text-clip {
-  text-overflow: clip;
-}
-
-/* Navbar responsive text handling */
+/* Navbar text handling */
 .navbar-text {
   text-overflow: ellipsis;
   overflow: hidden;
@@ -389,7 +182,7 @@ html {
   }
 }
 
-/* Custom focus-visible styles for dark theme */
+/* Focus styles for dark theme */
 :focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.6);
   outline-offset: 2px;

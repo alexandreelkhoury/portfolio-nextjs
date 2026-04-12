@@ -1,16 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { motion, useSpring, SpringOptions, useMotionValue } from 'framer-motion';
+import { motion, useSpring, useMotionValue } from 'framer-motion';
 
-type SpotlightProps = {
-  className?: string;
-  size?: number;
-  springOptions?: SpringOptions;
-};
-
-export default function Spotlight({
-}: SpotlightProps) {
-  
+export default function Spotlight() {
   const [isHovering, setIsHovering] = useState(false);
   const [isInsideHero, setIsInsideHero] = useState(false);
   const cursorX = useMotionValue(-100);
@@ -20,8 +12,8 @@ export default function Spotlight({
   const x = useSpring(cursorX, springConfig);
   const y = useSpring(cursorY, springConfig);
   const heroRef = useRef<HTMLElement | null>(null);
-  let lastMouseX = 0;
-  let lastMouseY = 0;
+  const lastMouseX = useRef(0);
+  const lastMouseY = useRef(0);
 
   useEffect(() => {
     const hero = document.getElementById('Hero'); // Get Hero section
@@ -35,15 +27,15 @@ export default function Spotlight({
         return;
       }
       setIsInsideHero(true);
-      lastMouseX = e.clientX;
-      lastMouseY = e.clientY;
-      cursorX.set(lastMouseX - 100);
-      cursorY.set(lastMouseY - 100);
+      lastMouseX.current = e.clientX;
+      lastMouseY.current = e.clientY;
+      cursorX.set(lastMouseX.current - 100);
+      cursorY.set(lastMouseY.current - 100);
     };
 
     const updateCursorOnScroll = () => {
       if (isInsideHero) {
-        cursorY.set(lastMouseY - 100);
+        cursorY.set(lastMouseY.current - 100);
       }
     };
 

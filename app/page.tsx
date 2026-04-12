@@ -2,7 +2,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import ProjectsShowcase from './components/ProjectsShowcase';
 import Expertise from './components/Expertise';
-import Loader from './components/Loader';
 import SplineSceneBasic from './components/Robot';
 import ScrollToTop from './components/ScrollToTop';
 import TimelineModern from './components/TimelineModern';
@@ -10,7 +9,6 @@ import AboutMe from './components/AboutMe';
 import { NavBar } from "@/components/ui/tubelight-navbar"
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
 
   const navItems = [
@@ -39,31 +37,15 @@ export default function Home() {
     };
   }, [handleResize]);
 
-  useEffect(() => {
-    setIsLoading(false);
-  }, []);
-
   return (
-    <div className="transition-container">
-      {isLoading && <Loader />}
-      <main
-        className={`content ${isLoading ? 'hidden' : 'visible'} space-y-0`}
-        style={{
-          opacity: isLoading ? 0 : 1,
-          transitionDelay: isLoading ? '0s' : '0.3s'
-        }}
-      >
-        
-        <NavBar items={navItems} />
-
-        {isLargeScreen && <ScrollToTop />}
-        <SplineSceneBasic />
-        <AboutMe />
-        <Expertise />
-        <TimelineModern />
-        <ProjectsShowcase />
-        
-      </main>
-    </div>
+    <main>
+      <NavBar items={navItems} />
+      {isLargeScreen && <ScrollToTop />}
+      <SplineSceneBasic />
+      <AboutMe />
+      <Expertise />
+      <TimelineModern />
+      <ProjectsShowcase />
+    </main>
   );
 }
