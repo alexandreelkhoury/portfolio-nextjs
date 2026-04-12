@@ -261,7 +261,7 @@ export default function Expertise() {
       y: 0,
       scale: 1,
       transition: {
-        type: 'spring',
+        type: 'spring' as const,
         stiffness: 300,
         damping: 30,
         delay: 0.1,

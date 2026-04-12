@@ -1,7 +1,8 @@
 'use client';
 import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { SiLinkedin, SiGmail } from 'react-icons/si';
+import { SiGmail } from 'react-icons/si';
+import { FaLinkedin } from 'react-icons/fa';
 
 const ConnectButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -211,7 +212,7 @@ const ConnectButton = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <SiLinkedin className="w-5 h-5 mr-4 text-neutral-500 group-hover:text-[#0A66C2] transition-colors duration-200 flex-shrink-0" />
+                  <FaLinkedin className="w-5 h-5 mr-4 text-neutral-500 group-hover:text-[#0A66C2] transition-colors duration-200 flex-shrink-0" />
                   <div className="text-left">
                     <p className="font-medium text-neutral-200 text-sm">LinkedIn</p>
                     <p className="text-xs text-neutral-500">alexandre-khoury</p>
