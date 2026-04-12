@@ -1,33 +1,23 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { motion, useMotionValue, useTransform, useScroll, spring, animate } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import {
   FaEthereum,
   FaReact,
   FaServer,
-  FaDatabase
 } from 'react-icons/fa';
 import {
   SiSolidity,
-  SiWeb3Dotjs,
   SiNextdotjs,
   SiNodedotjs,
   SiSolana,
   SiChainlink,
   SiTailwindcss,
   SiMongodb,
-  SiVite,
   SiNestjs,
   SiExpress,
   SiTypescript,
-  SiBitcoin,
-  SiGooglecloud,
-  SiPostgresql,
-  SiDocker,
-  SiXrp,
-  SiEthers
 } from 'react-icons/si';
-import CursorGlow from './CursorGlow';
 
 interface Skill {
   id: number;
@@ -41,11 +31,6 @@ interface Skill {
   description: string;
 }
 
-const blockchainIcons = [FaEthereum, SiSolidity, SiWeb3Dotjs, SiSolana, SiChainlink, SiXrp, SiEthers];
-const frontendIcons = [FaReact, SiNextdotjs, SiTailwindcss, SiTypescript, SiVite];
-const backendIcons = [SiNodedotjs, SiNestjs, SiMongodb, SiExpress, SiBitcoin, SiPostgresql, FaDatabase, SiGooglecloud, SiDocker];
-const fallingIcons = [...blockchainIcons, ...frontendIcons, ...backendIcons];
-
 interface SkillCardProps {
   skill: Skill;
   index: number;
@@ -53,10 +38,18 @@ interface SkillCardProps {
 
 const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const rotateX = useTransform(y, [-100, 100], [15, -15]);
   const rotateY = useTransform(x, [-100, 100], [-15, 15]);
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -84,7 +77,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
       onMouseLeave={handleMouseLeave}
       whileHover={{
         y: -5,
-        scale: typeof window !== 'undefined' && window.innerWidth >= 768 ? 1.03 : 1.01,
+        scale: isDesktop ? 1.03 : 1.01,
         boxShadow: "0 20px 40px rgba(0, 0, 0, 0.2), 0 0 30px rgba(255, 255, 255, 0.05)",
         transition: { type: 'spring', stiffness: 400, damping: 25 }
       }}
@@ -169,7 +162,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
                 background: 'linear-gradient(135deg, rgba(17, 17, 17, 0.8), rgba(31, 31, 31, 0.6))'
               }}
               whileHover={{ 
-                scale: typeof window !== 'undefined' && window.innerWidth >= 768 ? 1.1 : 1.05,
+                scale: isDesktop ? 1.1 : 1.05,
                 y: -2
               }}
               transition={{ type: 'spring', stiffness: 400 }}
@@ -196,13 +189,6 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
 };
 
 export default function Expertise() {
-
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
   const skills = [
     {
       id: 1,
@@ -215,7 +201,7 @@ export default function Expertise() {
         { icon: <SiChainlink />, name: "Chainlink" },
         { icon: <FaEthereum />, name: "EVM" },
       ],
-      description: "Implementing decentralized protocols and smart contract systems"
+      description: "Smart contracts, DeFi integrations, and on-chain protocols across EVM and Solana ecosystems"
     },
     {
       id: 2,
@@ -228,7 +214,7 @@ export default function Expertise() {
         { icon: <SiTailwindcss />, name: "Tailwind" },
         { icon: <SiTypescript />, name: "TypeScript" }
       ],
-      description: "Developing modern web interfaces with interactive user experiences"
+      description: "Responsive interfaces with 3D interactions, real-time data, and pixel-perfect design systems"
     },
     {
       id: 3,
@@ -241,7 +227,7 @@ export default function Expertise() {
         { icon: <SiMongodb />, name: "MongoDB" },
         { icon: <SiExpress />, name: "Express" },
       ],
-      description: "Building scalable server-side architectures and APIs"
+      description: "RESTful APIs, microservices, and cloud infrastructure powering production dApps"
     }
   ];
 
@@ -279,53 +265,8 @@ export default function Expertise() {
 
   return (
     <section id="expertise" className="relative pt-10 pb-8 sm:pb-12 overflow-visible z-30">
-      {/* <CursorGlow /> */}
-
-      {/* Animated logo background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0A0A] via-[#0A0A0A] to-[#0A0A0A] overflow-hidden">
-        {isClient && [...Array(typeof window !== 'undefined' && window.innerWidth >= 768 ? 15 : 8)].map((_, i) => {
-          const IconComponent = fallingIcons[Math.floor(Math.random() * fallingIcons.length)];
-          const category = blockchainIcons.includes(IconComponent) ? 'blockchain'
-            : frontendIcons.includes(IconComponent) ? 'frontend'
-              : 'backend';
-          const colors = {
-            blockchain: '#10B981',
-            frontend: '#3B82F6',
-            backend: '#F59E0B'
-          };
-
-          return (
-            <motion.div
-              key={i}
-              className="absolute flex items-center justify-center "
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                color: colors[category],
-                transform: `rotate(${Math.random() * 360}deg)`,
-                filter: `drop-shadow(0 0 10px ${colors[category]}80) 
-                  drop-shadow(0 0 10px ${colors[category]}90)`
-              }}
-              animate={{
-                y: [0, window.innerHeight * 1.2],
-                opacity: [0.6, 0],
-                scale: [Math.random() * 0.6 + 0.4, 0.1],
-                rotate: [0, Math.random() > 0.5 ? 360 : -360] // Keep rotation
-              }}
-              transition={{
-                duration: Math.random() * 5 + 6,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-            >
-              <IconComponent
-                size={`${Math.random() * 8 + 6}rem`}
-                className="drop-shadow-lg"
-              />
-            </motion.div>
-          );
-        })}
-      </div>
+      {/* Background */}
+      <div className="absolute inset-0 bg-[var(--bg-surface)]" />
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-7 pt-14">
         <div className="flex justify-center relative px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -335,9 +276,10 @@ export default function Expertise() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold mb-6 sm:mb-8 md:mb-12 text-transparent 
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold mb-6 sm:mb-8 md:mb-12 text-transparent
+       font-[family-name:var(--font-orbitron)]
        bg-gradient-to-br from-neutral-300 to-neutral-500
-       bg-clip-text inline-block w-fit relative px-2"> {/* Added relative here */}
+       bg-clip-text inline-block w-fit relative px-2">
               Technical Expertise
               <div className="absolute -bottom-1 sm:-bottom-2 md:-bottom-3 left-0 right-0 mx-auto h-0.5 sm:h-1 
             bg-gradient-to-r from-neutral-300 via-neutral-500 to-neutral-700 
@@ -345,8 +287,6 @@ export default function Expertise() {
             </h2>
           </motion.div>
         </div>
-        {/* from-[#05df72] via-[#3B82F6] to-[#ff8904] */}
-
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 py-8 sm:py-12 md:py-16"
           variants={containerVariants}
@@ -364,12 +304,7 @@ export default function Expertise() {
             </motion.div>
           ))}
         </motion.div>
-
-
-
       </div>
-
     </section>
-
   );
 }

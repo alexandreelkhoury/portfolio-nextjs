@@ -5,6 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --bg-surface: #0A0A0A;
+  --bg-card: rgba(17, 17, 17, 0.9);
+  --bg-card-light: rgba(31, 31, 31, 0.8);
   --background-rgb: 10, 10, 10;
   --foreground-rgb: 23, 23, 23;
   --radius: 0.625rem;
@@ -44,8 +47,12 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-exo2);
+  --font-display: var(--font-orbitron);
   --font-mono: var(--font-geist-mono);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-card: var(--bg-card);
+  --color-bg-card-light: var(--bg-card-light);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -144,10 +151,6 @@ html {
   backface-visibility: hidden;
 }
 
-body {
-  overflow-x: hidden;
-}
-
 .transition-container {
   position: relative;
   min-height: 100vh;
@@ -176,14 +179,14 @@ body {
   width: 100vw; /* Full width */
   height: 100vh; /* Full height */
   inset: 0;
-  background: #0A0A0A; /* Change this to your desired color */
+  background: var(--bg-surface);
   z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Loader.module.css */
+
 .spinner {
   width: 140.8px;  /* Doubled size */
   height: 140.8px; /* Doubled size */
@@ -244,15 +247,6 @@ body {
   }
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -262,16 +256,18 @@ body {
   }
 }
 
+/* Reduced motion for ALL users who prefer it (not just mobile) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Mobile-specific optimizations */
 @media (max-width: 768px) {
-  /* Disable motion for mobile users who prefer reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
   
   /* Optimize touch interactions */
   * {
@@ -381,18 +377,27 @@ body {
 }
 
 /* Navbar responsive text handling */
-@media (max-width: 639px) {
-  .navbar-text {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    max-width: 60px;
-  }
+.navbar-text {
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 @media (min-width: 640px) {
   .navbar-text {
-    text-overflow: clip !important;
-    overflow: visible !important;
-    max-width: none !important;
+    text-overflow: clip;
+    overflow: visible;
   }
+}
+
+/* Custom focus-visible styles for dark theme */
+:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
 }

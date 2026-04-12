@@ -1,14 +1,12 @@
 'use client';
-import { useEffect, useState } from 'react';
-import Hero from './components/Hero';
-import DemoHeroGeometric from './components/DemoHeroGeometric';
+import { useCallback, useEffect, useState } from 'react';
 import ProjectsShowcase from './components/ProjectsShowcase';
 import Expertise from './components/Expertise';
 import Loader from './components/Loader';
 import SplineSceneBasic from './components/Robot';
 import ScrollToTop from './components/ScrollToTop';
-import { User, Briefcase, FileText } from 'lucide-react'
 import TimelineModern from './components/TimelineModern';
+import AboutMe from './components/AboutMe';
 import { NavBar } from "@/components/ui/tubelight-navbar"
 
 export default function Home() {
@@ -17,20 +15,29 @@ export default function Home() {
 
   const navItems = [
     { name: 'Home', url: '#'},
+    { name: 'About', url: '#about'},
     { name: 'Expertise', url: '#expertise'},
-    { name: 'Timeline', url: '#timeline' },
+    { name: 'Journey', url: '#timeline' },
     { name: 'Projects', url: '#projects' }
-  ]  
+  ]
 
-  const handleResize = () => {
-    setIsLargeScreen(window.innerWidth >= 768); // 768px is the breakpoint for 'md'
-  };
+  const handleResize = useCallback(() => {
+    setIsLargeScreen(window.innerWidth >= 768);
+  }, []);
 
   useEffect(() => {
-    handleResize(); // Check screen size on mount
-    window.addEventListener('resize', handleResize); // Update on resize
-    return () => window.removeEventListener('resize', handleResize); // Clean up
-  }, []);
+    handleResize();
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const debouncedResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleResize, 150);
+    };
+    window.addEventListener('resize', debouncedResize);
+    return () => {
+      window.removeEventListener('resize', debouncedResize);
+      clearTimeout(timeoutId);
+    };
+  }, [handleResize]);
 
   useEffect(() => {
     setIsLoading(false);
@@ -47,15 +54,14 @@ export default function Home() {
         }}
       >
         
-        {/* <DemoHeroGeometric /> */}
         <NavBar items={navItems} />
-        
+
         {isLargeScreen && <ScrollToTop />}
         <SplineSceneBasic />
-        {/* <Hero /> */}
+        <AboutMe />
         <Expertise />
-        <ProjectsShowcase />
         <TimelineModern />
+        <ProjectsShowcase />
         
       </main>
     </div>

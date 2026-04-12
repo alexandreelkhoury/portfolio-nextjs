@@ -57,7 +57,7 @@ const ConnectButton = () => {
            shadow-xl shadow-neutral-400/20 overflow-hidden"
                     style={{
                         position: 'relative',
-                        background: "linear-gradient(45deg, #0A0A0A, #0A0A0A)", // Example gradient with neutral colors
+                        background: "linear-gradient(45deg, var(--bg-surface), var(--bg-surface))",
                         rotateX,
                         rotateY,
                         translateZ

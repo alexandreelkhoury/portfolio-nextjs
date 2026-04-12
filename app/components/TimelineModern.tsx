@@ -1,5 +1,5 @@
 'use client';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { useRef } from 'react';
 import Image from 'next/image';
 import { timelineData } from '../data/timeline.js';
@@ -13,6 +13,7 @@ interface TimelineItem {
 }
 
 const TimelineCard = ({ item, index }: { item: TimelineItem; index: number }) => {
+  const shouldReduceMotion = useReducedMotion();
   const cardRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: cardRef,
@@ -67,11 +68,13 @@ const TimelineCard = ({ item, index }: { item: TimelineItem; index: number }) =>
           className="w-4 h-4 rounded-full bg-gradient-to-r from-neutral-300 to-neutral-500 shadow-lg z-10 relative"
         >
           {/* Pulsing Effect */}
-          <motion.div
-            animate={{ scale: [1, 1.5, 1], opacity: [1, 0, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 rounded-full bg-neutral-400"
-          />
+          {!shouldReduceMotion && (
+            <motion.div
+              animate={{ scale: [1, 1.5, 1], opacity: [1, 0, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute inset-0 rounded-full bg-neutral-400"
+            />
+          )}
         </motion.div>
       </div>
 
@@ -180,7 +183,7 @@ const TimelineCard = ({ item, index }: { item: TimelineItem; index: number }) =>
 
 const TimelineModern = () => {
   return (
-    <section id="timeline" className="bg-[#0A0A0A] pt-4 sm:pt-8 pb-8 sm:pb-12 relative overflow-hidden">
+    <section id="timeline" className="bg-[var(--bg-surface)] pt-4 sm:pt-8 pb-8 sm:pb-12 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6">
         
         {/* Section Title */}
@@ -190,7 +193,7 @@ const TimelineModern = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-transparent bg-gradient-to-br from-neutral-300 to-neutral-500 bg-clip-text inline-block relative"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold font-[family-name:var(--font-orbitron)] text-transparent bg-gradient-to-br from-neutral-300 to-neutral-500 bg-clip-text inline-block relative"
           >
             Professional Journey
             <div className="absolute -bottom-1 sm:-bottom-2 md:-bottom-3 left-0 right-0 mx-auto h-0.5 sm:h-1 bg-gradient-to-r from-neutral-300 via-neutral-500 to-neutral-700 rounded-full" />
@@ -202,7 +205,7 @@ const TimelineModern = () => {
             transition={{ delay: 0.2, duration: 0.6 }}
             className="text-neutral-400 text-base md:text-lg mt-6 max-w-2xl mx-auto"
           >
-            From mathematics student to blockchain developer - my journey through Web3, DeFi, and full-stack development
+            Currently building at Sovra
           </motion.p>
         </div>
 
@@ -234,7 +237,7 @@ const TimelineModern = () => {
           className="text-center mt-16"
         >
           <p className="text-neutral-500 text-sm">
-            Ready to build the future of Web3 together
+            Currently building at Sovra
           </p>
         </motion.div>
       </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback, useRef } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -17,33 +17,59 @@ interface NavBarProps {
 export function NavBar({ items }: NavBarProps) {
   const [activeTab, setActiveTab] = useState(items[0].name)
   const [isVisible, setIsVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
+  const lastScrollY = useRef(0)
+  const isClickScrolling = useRef(false)
+
+  // Map nav item names to their section IDs
+  const sectionIds = items.map((item) => {
+    if (item.url === '#') return 'Hero'
+    return item.url.replace('#', '')
+  })
+
+  const updateActiveSection = useCallback(() => {
+    if (isClickScrolling.current) return
+
+    const scrollY = window.scrollY
+    const viewportHeight = window.innerHeight
+
+    // If near top, activate Home
+    if (scrollY < viewportHeight * 0.3) {
+      setActiveTab(items[0].name)
+      return
+    }
+
+    // Find which section is most visible
+    for (let i = sectionIds.length - 1; i >= 0; i--) {
+      const el = document.getElementById(sectionIds[i])
+      if (el) {
+        const rect = el.getBoundingClientRect()
+        if (rect.top <= viewportHeight * 0.4) {
+          setActiveTab(items[i].name)
+          return
+        }
+      }
+    }
+  }, [items, sectionIds])
 
   useEffect(() => {
     const controlNavbar = () => {
-      if (typeof window !== 'undefined') {
-        const currentScrollY = window.scrollY
-        
-        // Show navbar when at top of page
-        if (currentScrollY < 10) {
-          setIsVisible(true)
-        }
-        // Hide when scrolling down, show when scrolling up
-        else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-          setIsVisible(false)
-        } else if (currentScrollY < lastScrollY) {
-          setIsVisible(true)
-        }
-        
-        setLastScrollY(currentScrollY)
+      const currentScrollY = window.scrollY
+
+      if (currentScrollY < 10) {
+        setIsVisible(true)
+      } else if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setIsVisible(false)
+      } else if (currentScrollY < lastScrollY.current) {
+        setIsVisible(true)
       }
+
+      lastScrollY.current = currentScrollY
+      updateActiveSection()
     }
 
-    if (typeof window !== 'undefined') {
-      window.addEventListener('scroll', controlNavbar)
-      return () => window.removeEventListener('scroll', controlNavbar)
-    }
-  }, [lastScrollY])
+    window.addEventListener('scroll', controlNavbar)
+    return () => window.removeEventListener('scroll', controlNavbar)
+  }, [updateActiveSection])
 
   return (
     <motion.div
@@ -57,7 +83,7 @@ export function NavBar({ items }: NavBarProps) {
         ease: "easeInOut" 
       }}
       className={cn(
-        "fixed top-2 sm:top-3 left-1/2 -translate-x-1/2 z-50 mb-6 w-[90%] sm:w-auto max-w-[380px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-none",
+        "fixed top-2 sm:top-3 left-1/2 -translate-x-1/2 z-40 mb-6 w-[90%] sm:w-auto max-w-[380px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-none",
       )}
     >
       <div className="flex items-center justify-center gap-0.5 sm:gap-2 md:gap-3 lg:gap-4 bg-black/30 border border-neutral-600/50 backdrop-blur-xl py-1.5 sm:py-2 px-1.5 sm:px-2 md:px-3 lg:px-4 rounded-full shadow-2xl shadow-black/20 overflow-visible"
@@ -71,7 +97,11 @@ export function NavBar({ items }: NavBarProps) {
             <Link
               key={item.name}
               href={item.url}
-              onClick={() => setActiveTab(item.name)}
+              onClick={() => {
+                setActiveTab(item.name)
+                isClickScrolling.current = true
+                setTimeout(() => { isClickScrolling.current = false }, 800)
+              }}
               className={cn(
                 "relative cursor-pointer text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg font-semibold px-1.5 xs:px-2 sm:px-4 md:px-6 lg:px-8 xl:px-10 py-1.5 xs:py-2 sm:py-2.5 md:py-3 rounded-full transition-all text-center",
                 "flex-1 min-w-0 sm:flex-none sm:min-w-fit",

@@ -1,5 +1,5 @@
 'use client';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
+import { motion, AnimatePresence, PanInfo, useReducedMotion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import projects from '../data/projects';
@@ -16,6 +16,7 @@ interface Project {
 const ProjectsShowcase = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
 
   // Auto-advance projects every 8 seconds (optional)
   useEffect(() => {
@@ -64,7 +65,7 @@ const ProjectsShowcase = () => {
   };
 
   const slideVariants = {
-    enter: (direction: number) => ({
+    enter: (direction: number) => (shouldReduceMotion ? { opacity: 0 } : {
       x: direction > 0 ? 1000 : -1000,
       opacity: 0,
       scale: 0.8,
@@ -77,7 +78,7 @@ const ProjectsShowcase = () => {
       scale: 1,
       rotateY: 0,
     },
-    exit: (direction: number) => ({
+    exit: (direction: number) => (shouldReduceMotion ? { opacity: 0 } : {
       zIndex: 0,
       x: direction < 0 ? 1000 : -1000,
       opacity: 0,
@@ -98,7 +99,7 @@ const ProjectsShowcase = () => {
   };
 
   return (
-    <section id="projects" className="bg-[#0A0A0A] py-4 sm:py-8 pb-0 relative overflow-hidden">
+    <section id="projects" className="bg-[var(--bg-surface)] py-4 sm:py-8 pb-0 relative overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 h-full">
         {/* Section Title */}
         <div className="text-center mb-8 sm:mb-12">
@@ -107,7 +108,7 @@ const ProjectsShowcase = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-transparent bg-gradient-to-br from-neutral-300 to-neutral-500 bg-clip-text inline-block relative"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold font-[family-name:var(--font-orbitron)] text-transparent bg-gradient-to-br from-neutral-300 to-neutral-500 bg-clip-text inline-block relative"
           >
             Featured Projects
             <div className="absolute -bottom-1 sm:-bottom-2 md:-bottom-3 left-0 right-0 mx-auto h-0.5 sm:h-1 bg-gradient-to-r from-neutral-300 via-neutral-500 to-neutral-700 rounded-full" />
@@ -159,6 +160,8 @@ const ProjectsShowcase = () => {
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     priority={currentIndex === 0}
                     quality={85}
+                    placeholder="blur"
+                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzFhMWExYSIvPjwvc3ZnPg=="
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   
@@ -247,7 +250,8 @@ const ProjectsShowcase = () => {
               onClick={prevProject}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+              aria-label="Previous project"
+              className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors cursor-pointer"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -255,16 +259,19 @@ const ProjectsShowcase = () => {
             </motion.button>
 
             {/* Project Indicators */}
-            <div className="flex space-x-2">
-              {projects.map((_, index) => (
+            <div className="flex space-x-2" role="tablist" aria-label="Project navigation">
+              {projects.map((project, index) => (
                 <motion.button
                   key={index}
                   onClick={() => goToProject(index)}
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.8 }}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    index === currentIndex 
-                      ? 'bg-white scale-125' 
+                  role="tab"
+                  aria-selected={index === currentIndex}
+                  aria-label={`Go to project ${index + 1}: ${project.title}`}
+                  className={`w-3 h-3 rounded-full transition-all cursor-pointer ${
+                    index === currentIndex
+                      ? 'bg-white scale-125'
                       : 'bg-white/30 hover:bg-white/50'
                   }`}
                 />
@@ -276,7 +283,8 @@ const ProjectsShowcase = () => {
               onClick={nextProject}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+              aria-label="Next project"
+              className="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors cursor-pointer"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

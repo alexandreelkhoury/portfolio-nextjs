@@ -2,32 +2,60 @@
 
 import { SplineScene } from "./Splite";
 import { Card } from "./Card";
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import ConnectButton from './ConnectButton';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Spotlight from "./Spotlight"
-import dynamic from 'next/dynamic'
-
-const NoSSR = dynamic(() => import('./Spotlight'), { ssr: false })
 
 function SplineSceneBasic() {
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showSpline, setShowSpline] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(true);
+  const shouldReduceMotion = useReducedMotion();
 
-  const handleResize = () => {
-    setIsLargeScreen(window.innerWidth >= 1500); // 1200px is the breakpoint for wider screens
-    setIsMobile(window.innerWidth < 768); // Mobile breakpoint
-  };
+  const handleResize = useCallback(() => {
+    setIsLargeScreen(window.innerWidth >= 1500);
+    setIsMobile(window.innerWidth < 768);
+  }, []);
 
   useEffect(() => {
-    handleResize(); // Check screen size on mount
-    window.addEventListener('resize', handleResize); // Update on resize
-    return () => window.removeEventListener('resize', handleResize); // Clean up
+    handleResize();
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const debouncedResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleResize, 150);
+    };
+    window.addEventListener('resize', debouncedResize);
+    return () => {
+      window.removeEventListener('resize', debouncedResize);
+      clearTimeout(timeoutId);
+    };
+  }, [handleResize]);
+
+  // Lazy-load the Spline 3D scene after initial page paint
+  useEffect(() => {
+    if (isLargeScreen) {
+      const timer = setTimeout(() => setShowSpline(true), 100);
+      return () => clearTimeout(timer);
+    }
+    setShowSpline(false);
+  }, [isLargeScreen]);
+
+  // Auto-hide scroll indicator after 4 seconds or on scroll
+  useEffect(() => {
+    const timer = setTimeout(() => setShowScrollHint(false), 4000);
+    const onScroll = () => setShowScrollHint(false);
+    window.addEventListener('scroll', onScroll, { once: true });
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   return (
     <section id="Hero">
-      <Card className="w-full h-[100vh] bg-[#0A0A0A] relative overflow-hidden">
+      <Card className="w-full h-[100vh] bg-[var(--bg-surface)] relative overflow-hidden">
 
         {!isMobile && <Spotlight />}
 
@@ -37,9 +65,9 @@ function SplineSceneBasic() {
             {/* Left Content */}
             <motion.div
               className="w-full max-w-sm sm:max-w-lg md:max-w-xl lg:max-w-2xl text-center"
-              initial={{ opacity: 0, y: 60 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 60 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{
+              transition={shouldReduceMotion ? { duration: 0 } : {
                 duration: 0.8,
                 delay: 0.2,
                 ease: [0.61, 1, 0.88, 1]
@@ -56,7 +84,8 @@ function SplineSceneBasic() {
 
               {/* Gradient Title */}
               <motion.h1
-                className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black 
+                className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black
+               font-[family-name:var(--font-orbitron)]
                bg-clip-text text-transparent bg-gradient-to-br from-neutral-50 via-neutral-200
                to-neutral-400 mb-4 sm:mb-6 md:mb-8 lg:mb-10 leading-tight px-1 relative"
                 style={{
@@ -64,10 +93,10 @@ function SplineSceneBasic() {
                   backgroundPosition: '50% 0%',
                   filter: 'drop-shadow(0 0 30px rgba(255, 255, 255, 0.1))'
                 }}
-                animate={{
+                animate={shouldReduceMotion ? {} : {
                   backgroundPosition: ['50% 0%', '100% 0%', '50% 0%']
                 }}
-                transition={{
+                transition={shouldReduceMotion ? { duration: 0 } : {
                   duration: 8,
                   repeat: Infinity,
                   ease: "easeInOut"
@@ -88,7 +117,7 @@ function SplineSceneBasic() {
                   ease: 'anticipate'
                 }}
               >
-                Software Engineer
+                Blockchain & Full-Stack Developer
               </motion.div>
 
               {/* CTA Section */}
@@ -111,26 +140,36 @@ function SplineSceneBasic() {
             </motion.div>
           </div>
 
-          {/* Right Content (3D Scene) */}
+          {/* Right Content (3D Scene) - lazy loaded */}
           {isLargeScreen && (
             <div className="w-[55%] relative">
-              <SplineScene
-                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                className="w-full h-full"
-              />
+              {showSpline ? (
+                <SplineScene
+                  scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                  className="w-full h-full"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-neutral-600 border-t-neutral-300 rounded-full animate-spin" />
+                </div>
+              )}
             </div>
           )}
 
-          {/* Responsive Scroll Indicator */}
-          <motion.div
-            className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-          >
-            <div className="w-6 h-10 md:w-8 md:h-14 rounded-xl md:rounded-3xl border-2 border-neutral-400 flex justify-center p-1">
-              <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-neutral-400 rounded-full animate-pulse" />
-            </div>
-          </motion.div>
+          {/* Responsive Scroll Indicator - auto-hides */}
+          {showScrollHint && (
+            <motion.div
+              className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              animate={shouldReduceMotion ? {} : { y: [0, 10, 0] }}
+              transition={shouldReduceMotion ? {} : { repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+            >
+              <div className="w-6 h-10 md:w-8 md:h-14 rounded-xl md:rounded-3xl border-2 border-neutral-400 flex justify-center p-1">
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-neutral-400 rounded-full animate-pulse" />
+              </div>
+            </motion.div>
+          )}
         </div>
       </Card>
     </section>
