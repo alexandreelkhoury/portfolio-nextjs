@@ -192,6 +192,22 @@ const ProjectsShowcase = () => {
                   )}
                 </motion.div>
               </AnimatePresence>
+
+              {/* Preload adjacent project images */}
+              <div className="hidden">
+                {[
+                  (currentIndex + 1) % projects.length,
+                  (currentIndex - 1 + projects.length) % projects.length,
+                ].map((i) => (
+                  <Image
+                    key={projects[i].img}
+                    src={projects[i].img}
+                    alt=""
+                    width={1}
+                    height={1}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Project Details */}
