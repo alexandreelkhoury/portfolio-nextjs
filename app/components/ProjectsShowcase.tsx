@@ -4,15 +4,6 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import projects from '../data/projects';
 
-interface Project {
-  img: string;
-  title: string;
-  description: string;
-  url: string;
-  github: string;
-  tech: string[];
-}
-
 const ProjectsShowcase = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
@@ -55,7 +46,7 @@ const ProjectsShowcase = () => {
     setCurrentIndex(index);
   };
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (_event: unknown, info: PanInfo) => {
     const threshold = 50;
     if (info.offset.x > threshold) {
       prevProject();
@@ -148,31 +139,46 @@ const ProjectsShowcase = () => {
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={1}
                   onDragEnd={handleDragEnd}
-                  className="absolute inset-0 rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-b from-white/5 to-transparent cursor-grab active:cursor-grabbing"
+                  className="absolute inset-0 rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-b from-white/5 to-transparent cursor-grab active:cursor-grabbing flex flex-col"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Image
-                    src={projects[currentIndex].img}
-                    alt={projects[currentIndex].title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    priority={currentIndex === 0}
-                    quality={85}
-                    placeholder="blur"
-                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzFhMWExYSIvPjwvc3ZnPg=="
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  
+                  {/* Browser chrome */}
+                  <div className="flex items-center gap-2 px-4 py-2.5 bg-neutral-900/90 border-b border-white/5 flex-shrink-0">
+                    <div className="flex gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+                    </div>
+                    <div className="flex-1 mx-3">
+                      <div className="bg-neutral-800 rounded-md px-3 py-1 text-[10px] sm:text-xs text-neutral-500 font-mono truncate">
+                        {projects[currentIndex].url.replace(/^https?:\/\//, '')}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="relative flex-1">
+                    <Image
+                      src={projects[currentIndex].img}
+                      alt={projects[currentIndex].title}
+                      fill
+                      className="object-cover object-top"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      priority={currentIndex === 0}
+                      quality={85}
+                      placeholder="blur"
+                      blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzFhMWExYSIvPjwvc3ZnPg=="
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                  </div>
+
                   {/* Drag Hint */}
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                    <motion.div 
+                    <motion.div
                       animate={{ opacity: [0.5, 1, 0.5] }}
                       transition={{ duration: 2, repeat: Infinity }}
                       className="text-white/60 text-xs flex items-center gap-2"
                     >
-                      ← Drag to navigate →
+                      Drag to navigate
                     </motion.div>
                   </div>
                 </motion.div>

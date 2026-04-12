@@ -11,7 +11,7 @@
   --background-rgb: 10, 10, 10;
   --foreground-rgb: 23, 23, 23;
   --radius: 0.625rem;
-  --background: 10 10 10;
+  --background: var(--bg-surface);
   --foreground: oklch(0.712 0.194 13.428);
   --card: oklch(10 10 10);
   --card-foreground: oklch(0.145 0 0);

@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   },
 };
 
-// 2. Add separate viewport export
+// Viewport config
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -97,50 +97,51 @@ export default function RootLayout({
         <div className="min-h-screen">
           {children}
         </div>
-        <footer className="bg-[var(--bg-surface)] border-t border-neutral-400 text-white py-8 sm:py-12 ">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-            {/* Contact Section */}
-            <div className="text-center sm:text-left md:text-left space-y-3 sm:space-y-4">
-              <h3 className="text-lg sm:text-xl font-semibold text-neutral-500">Let's Connect</h3>
-              <div className="flex flex-col space-y-2 text-neutral-300 text-sm sm:text-base">
-                <a href="mailto:alexkhoury@hotmail.com" target="_blank" className="hover:text-white transition-colors break-all">
-                  alexkhoury@hotmail.com
-                </a>
-                <p>+33 7 49 99 04 69</p>
-                <p>Paris, France</p>
-              </div>
-            </div>
-
-            {/* Social Media */}
-            <div className="text-center sm:text-left md:text-left space-y-3 sm:space-y-4">
-              <h3 className="text-lg sm:text-xl font-semibold text-neutral-500">Follow Me</h3>
-              <div className="flex justify-center sm:justify-start md:justify-start space-x-4 sm:space-x-6">
-                <a href="https://github.com/alexandreelkhoury" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" aria-label="GitHub">
-                  <FaGithub className="w-8 sm:w-10 h-8 sm:h-10" />
-                </a>
-                <a href="https://www.linkedin.com/in/alexandre-khoury/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" aria-label="LinkedIn">
-                  <FaLinkedin className="w-8 sm:w-10 h-8 sm:h-10" />
-                </a>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div className="text-center sm:text-left md:text-left space-y-3 sm:space-y-4 sm:col-span-2 md:col-span-1">
-              <h3 className="text-lg sm:text-xl font-semibold text-neutral-500">Quick Links</h3>
-              <div className="flex flex-col space-y-2 text-neutral-300 text-sm sm:text-base">
-                <a href="#expertise" className="hover:text-white transition-colors">Expertise</a>
-                <a href="#timeline" className="hover:text-white transition-colors">Timeline</a>
-                <a href="#projects" className="hover:text-white transition-colors">Projects</a>
-              </div>
+        <footer className="bg-[var(--bg-surface)] text-white">
+          {/* CTA Section */}
+          <div className="border-t border-neutral-800 py-16 sm:py-20">
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-orbitron)] text-transparent bg-gradient-to-br from-neutral-300 to-neutral-500 bg-clip-text mb-4">
+                Let's build something together
+              </h3>
+              <p className="text-neutral-400 text-base sm:text-lg mb-8">
+                Got a project in mind? I'm always interested in new challenges.
+              </p>
+              <a
+                href="mailto:alexkhoury@hotmail.com"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-black font-medium rounded-full hover:bg-white/90 transition-colors text-lg"
+              >
+                Get in Touch
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
             </div>
           </div>
 
-          {/* Bottom Bar */}
-          <div className="mt-8 sm:mt-12 border-t border-neutral-800 pt-6 sm:pt-8">
-            <p className="text-center text-neutral-400 text-xs sm:text-sm px-4">
-              © {new Date().getFullYear()} Alexandre El-Khoury. All rights reserved.
-              <span className="block sm:inline sm:ml-2 mt-1 sm:mt-0">Made with ❤️ using Next.js</span>
-            </p>
+          {/* Footer links */}
+          <div className="border-t border-neutral-800 py-8 sm:py-12">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+              <p className="text-neutral-500 text-sm">
+                © {new Date().getFullYear()} Alexandre El-Khoury
+              </p>
+
+              <div className="flex items-center gap-6">
+                <a href="#about" className="text-neutral-400 hover:text-white transition-colors text-sm">About</a>
+                <a href="#expertise" className="text-neutral-400 hover:text-white transition-colors text-sm">Expertise</a>
+                <a href="#timeline" className="text-neutral-400 hover:text-white transition-colors text-sm">Journey</a>
+                <a href="#projects" className="text-neutral-400 hover:text-white transition-colors text-sm">Projects</a>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <a href="https://github.com/alexandreelkhoury" target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-white transition-colors" aria-label="GitHub">
+                  <FaGithub className="w-5 h-5" />
+                </a>
+                <a href="https://www.linkedin.com/in/alexandre-khoury/" target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-white transition-colors" aria-label="LinkedIn">
+                  <FaLinkedin className="w-5 h-5" />
+                </a>
+              </div>
+            </div>
           </div>
         </footer>
       </body>

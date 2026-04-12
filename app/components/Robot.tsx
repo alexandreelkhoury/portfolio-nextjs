@@ -15,7 +15,7 @@ function SplineSceneBasic() {
   const shouldReduceMotion = useReducedMotion();
 
   const handleResize = useCallback(() => {
-    setIsLargeScreen(window.innerWidth >= 1500);
+    setIsLargeScreen(window.innerWidth >= 1024);
     setIsMobile(window.innerWidth < 768);
   }, []);
 
@@ -61,7 +61,7 @@ function SplineSceneBasic() {
 
         <div className="flex h-full">
           {/* Main Content Container */}
-          <div className={`w-full flex justify-center items-center ${isLargeScreen ? 'md:w-[45%]' : 'flex justify-center items-center'} p-3 sm:p-6 md:p-8 relative z-10`}>
+          <div className={`w-full flex justify-center items-center ${isLargeScreen ? 'lg:w-[45%]' : ''} p-3 sm:p-6 md:p-8 relative z-10`}>
             {/* Left Content */}
             <motion.div
               className="w-full max-w-sm sm:max-w-lg md:max-w-xl lg:max-w-2xl text-center"

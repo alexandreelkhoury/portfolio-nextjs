@@ -37,14 +37,14 @@ const projects = [
     url: 'https://stamply-leb.netlify.app/',
     tech: ['React', 'Node.js', 'Firebase', 'Stripe'],
   },
-  {
-    img: '/images/3.png',
-    title: 'Metav.rs Infrastructure',
-    description: 'Blockchain infrastructure and smart contract suite for an NFT and metaverse platform. Managed multi-chain deployments and backend analytics pipelines.',
-    url: 'https://metav.rs',
-    github: 'https://github.com/alexandreelkhoury',
-    tech: ['Node.js', 'Solidity', 'PostgreSQL', 'Docker', 'Web3'],
-  },
+  // {
+  //   img: '/images/3.png',
+  //   title: 'Metav.rs Infrastructure',
+  //   description: 'Blockchain infrastructure and smart contract suite for an NFT and metaverse platform. Managed multi-chain deployments and backend analytics pipelines.',
+  //   url: 'https://metav.rs',
+  //   github: 'https://github.com/alexandreelkhoury',
+  //   tech: ['Node.js', 'Solidity', 'PostgreSQL', 'Docker', 'Web3'],
+  // },
 ];
 
 export default projects;
