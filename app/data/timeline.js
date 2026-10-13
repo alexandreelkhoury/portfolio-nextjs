@@ -3,7 +3,7 @@ export const timelineData = [
         year: 'Oct 2025 - Present',
         title: 'Full Stack & Blockchain Developer',
         company: 'Sovra',
-        description: 'Building a DeFi savings platform that lets retail users earn yield through Aave without ever touching a wallet. Architected the account abstraction layer for gasless onboarding and built the full-stack from Next.js frontend to NestJS APIs.',
+        description: 'Building a DeFi savings platform that lets retail users earn yield through Aave and Morpho without ever touching a wallet. Architected the account abstraction layer for gasless onboarding and built the full stack, from the React Native apps and Next.js frontend to the Express APIs.',
         icon: 'work'
     },
     {

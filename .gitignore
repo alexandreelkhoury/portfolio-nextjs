@@ -41,4 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 .firebase
-.next
+.nextscrollcraft/lab
+
+app/heroes/*/lab/
+scrollcraft/lab/

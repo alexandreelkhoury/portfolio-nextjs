@@ -1,0 +1,154 @@
+.root {
+  --ground: #e6e3de;
+  --ink: #1c1b19;
+  --ink-soft: #57534c;
+  --accent: #1b2a4a;
+  --g: clamp(20px, 4.4vw, 72px);
+  --h: clamp(3.6rem, 10.6vw, 12rem);
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-liq), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: 'ss01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+.root ::selection { background: var(--accent); color: var(--ground); }
+
+.hero { position: relative; height: 340vh; }
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--ground);
+  touch-action: pan-y;
+}
+
+.backdrop, .liquid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.backdrop { z-index: 0; }
+.copy { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.liquid { z-index: 2; pointer-events: none; }
+.fade {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 22%;
+  z-index: 3; opacity: 0; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(230, 227, 222, 0), var(--ground) 85%);
+}
+.labels { position: absolute; inset: 0; z-index: 4; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.fg {
+  position: absolute; z-index: 5; pointer-events: none;
+  width: 34vw; height: 34vw; left: -8vw; bottom: -15vw;
+  will-change: transform;
+}
+.fgDrift, .fgCanvas { width: 100%; height: 100%; display: block; }
+
+/* type */
+.h1 {
+  position: absolute;
+  left: var(--g);
+  top: 15vh;
+  margin: 0;
+  font-size: var(--h);
+  font-weight: 500;
+  line-height: 0.88;
+  letter-spacing: -0.058em;
+  transform-origin: 0 0;
+  will-change: transform;
+  white-space: nowrap;
+}
+.line { display: block; }
+.line + .line { padding-left: 0.04em; }
+.sub {
+  position: absolute;
+  left: var(--g);
+  top: calc(15vh + var(--h) * 1.76 + 2.2rem);
+  margin: 0;
+  max-width: 24ch;
+  font-size: clamp(1.05rem, 1.35vw, 1.3rem);
+  line-height: 1.4;
+  letter-spacing: -0.012em;
+  color: var(--ink-soft);
+  text-wrap: balance;
+  will-change: transform;
+}
+.accent { color: var(--accent); font-weight: 500; }
+.caption {
+  position: absolute;
+  right: var(--g);
+  bottom: 5.5vh;
+  margin: 0;
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+}
+
+/* gallery labels */
+.label { position: absolute; left: 0; top: 0; width: 14.5rem; will-change: transform; }
+.labelIn { display: flex; flex-direction: column; gap: 0.2rem; opacity: 0; pointer-events: auto; }
+.labelIn::before {
+  content: '';
+  width: 1.5rem; height: 1px; margin-bottom: 0.55rem;
+  background: currentColor; opacity: 0.35;
+}
+.title {
+  font-size: 1rem; font-weight: 500; letter-spacing: -0.01em;
+  color: var(--ink); text-decoration: none;
+  text-decoration-thickness: 1px; text-underline-offset: 0.22em;
+  transition: color 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .title:hover { color: var(--accent); text-decoration-line: underline; }
+}
+.title:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+.medium { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.desc { font-size: 0.875rem; line-height: 1.45; color: var(--ink-soft); max-width: 30ch; text-wrap: pretty; }
+
+/* stub */
+.stub {
+  position: relative;
+  min-height: 80vh;
+  padding: clamp(5rem, 14vh, 9rem) var(--g);
+  background: var(--ground);
+}
+.stubTitle {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.4vw, 2.25rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+/* mobile art direction */
+@media (max-width: 759px), (max-aspect-ratio: 4/5) {
+  .root { --g: 16px; --h: clamp(3rem, 16.4vw, 5.2rem); }
+  .hero { height: 300vh; }
+  .h1 { top: 31vh; top: 31svh; letter-spacing: -0.05em; }
+  .sub { top: auto; bottom: 15svh; max-width: 22ch; font-size: 1.0625rem; }
+  .caption { right: auto; left: var(--g); bottom: auto; top: 6svh; }
+  .fg { width: 62vw; height: 62vw; left: auto; right: -20vw; bottom: auto; top: 4vh; }
+  .label { width: 10.5rem; }
+  .fade { height: 11%; }
+  .title { font-size: 0.9375rem; }
+  .medium { font-size: 0.6875rem; }
+  .desc { font-size: 0.8125rem; }
+}
+
+/* reduced motion: one complete static composition, no pinned scroll */
+@media (prefers-reduced-motion: reduce) {
+  .hero { height: auto; }
+  .stage { position: relative; min-height: 640px; }
+  .fg { display: none; }
+}
+
+/* no WebGL: the labels become a plain list */
+.noGL .labels { position: absolute; inset: auto var(--g) 8vh var(--g); display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1.5rem; }
+.noGL .label { position: static; width: auto; transform: none !important; }
+.noGL .labelIn { opacity: 1 !important; }
+.noGL .fg { display: none; }
+.noGL .backdrop { background: linear-gradient(#efede9, #e6e3de 55%, #d5d1ca); }
