@@ -1867,3 +1867,10 @@
     display: none;
   }
 }
+
+/* tap targets: standalone plate links get a 44px hit area without moving the type */
+.plateLinks a {
+  display: inline-block;
+  padding-block: 10px;
+  margin-block: -10px;
+}

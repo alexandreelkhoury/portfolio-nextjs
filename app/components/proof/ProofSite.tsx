@@ -225,6 +225,8 @@ export default function ProofSite({ className = '' }: { className?: string }) {
               edge.style.opacity = '1';
               edge.setAttribute('viewBox', `0 0 ${W} ${vh}`);
               edge.style.transform = `translate3d(0, ${f1(oy)}px, 0)`;
+              // the edge lives in viewport space; never draw it above this chapter's own top
+              edge.style.clipPath = `inset(${f1(Math.max(0, -oy))}px 0 0 0)`;
               edgePath.setAttribute('d', lines.map((l) => pathOf(l.pts, 0, l.closed)).join(' '));
             }
           }

@@ -718,6 +718,7 @@ export default function Figures() {
       stage.dataset.lifted = 'false';
     };
 
+    let stageST: ScrollTrigger | undefined;
     const render = () => {
       const P = prog.current * n;
       const i = Math.min(n - 1, Math.floor(P));
@@ -740,7 +741,8 @@ export default function Figures() {
       const fade = Math.min(smooth(clamp01(u / 0.05)), i === n - 1 ? 1 : smooth(clamp01((1 - u) / 0.05)));
       if (glRef.current) glRef.current.style.opacity = fade.toFixed(3);
       // the video lifts off during the hold
-      const hold = u > 0.36 && u < 0.64;
+      // only while the stage is pinned: scrub lag must not lift a video after the stage has gone
+      const hold = u > 0.36 && u < 0.64 && (stageST?.isActive ?? false);
       if (hold && lifted !== i) {
         liftBack();
         liftOut(i);
@@ -748,7 +750,7 @@ export default function Figures() {
     };
 
     const ctx = gsap.context(() => {
-      gsap.to(prog, {
+      const stageTween = gsap.to(prog, {
         current: 1,
         ease: 'none',
         scrollTrigger: {
@@ -764,6 +766,7 @@ export default function Figures() {
         },
         onUpdate: render,
       });
+      stageST = stageTween.scrollTrigger;
 
       const reel = reelRef.current!;
       const track = trackRef.current!;

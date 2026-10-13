@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
 
-export const alt = 'Alexandre El-Khoury - Blockchain & Full-Stack Developer';
+export const alt = 'Alexandre El-Khoury, Software & Blockchain Engineer';
 export const size = {
   width: 1200,
   height: 630,
@@ -107,7 +107,7 @@ export default async function Image() {
             margin: '0 0 40px 0',
           }}
         >
-          Blockchain & Full-Stack Developer
+          Software & Blockchain Engineer
         </p>
 
         {/* Tech badges */}
@@ -145,7 +145,7 @@ export default async function Image() {
             gap: '8px',
           }}
         >
-          <span style={{ color: '#525252', fontSize: '16px' }}>Paris, France</span>
+          <span style={{ color: '#525252', fontSize: '16px' }}>Beirut, Lebanon</span>
         </div>
       </div>
     ),
