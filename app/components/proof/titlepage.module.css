@@ -2,7 +2,7 @@
   --paper: #f2ede3;
   --ink: #17150f;
   --ink-soft: #595244;
-  --verm: #c8401e;
+  --verm: #b0361a;
   --gutter: clamp(16px, 4vw, 56px);
   --serif: var(--pf-serif), 'Iowan Old Style', Georgia, serif;
   --mono: var(--pf-mono), ui-monospace, monospace;
@@ -107,7 +107,7 @@
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(23, 21, 15, 0.22);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12.5px;
   letter-spacing: 0.06em;
   color: var(--ink-soft);
 }
@@ -132,7 +132,7 @@
   flex-direction: column;
   gap: 4px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12.5px;
   line-height: 1.5;
   letter-spacing: 0.02em;
   color: var(--ink-soft);
@@ -231,7 +231,7 @@
 }
 .kicker {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 12.5px;
   letter-spacing: 0.08em;
   color: var(--ink-soft);
   padding-bottom: 0.6rem;
@@ -270,7 +270,7 @@
 .stubKicker {
   margin: 0 0 18px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12.5px;
   letter-spacing: 0.08em;
   color: var(--ink-soft);
 }
@@ -303,11 +303,11 @@
     font-size: 1.15rem;
   }
   .folio {
-    font-size: 10px;
+    font-size: 11.5px;
     letter-spacing: 0.04em;
   }
   .caption {
-    font-size: 9.5px;
+    font-size: 11.5px;
     right: var(--gutter);
   }
   .noteA {
@@ -366,4 +366,36 @@
   .canvas {
     transition: none;
   }
+}
+
+/* leave room for the site's running head (CV · Contact) at the top right */
+@media (min-width: 1100px) {
+  .folio {
+    right: calc(var(--gutter) + 132px);
+  }
+}
+@media (max-width: 1099px) {
+  .caption {
+    bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+}
+
+/* a line drawing in place of the surface until its first frame renders */
+.ph {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: min(56vw, 640px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0.3;
+  transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.ph path {
+  stroke: #17150f;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.front.ready ~ .ph {
+  opacity: 0;
 }

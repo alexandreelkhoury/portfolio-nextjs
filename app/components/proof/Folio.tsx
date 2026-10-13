@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { CHAPTERS } from './content';
+import { CHAPTERS, LINKS } from './content';
+import { scrollToId } from './smooth';
 import s from './site.module.css';
 
 /*
@@ -13,6 +14,7 @@ import s from './site.module.css';
 export default function Folio() {
   const [active, setActive] = useState(-1);
   const [dark, setDark] = useState(false);
+  const [headDark, setHeadDark] = useState(false);
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLElement>(null);
 
@@ -28,6 +30,15 @@ export default function Folio() {
         if (el && el.getBoundingClientRect().top <= line) a = i;
       });
       setActive(a);
+      // how far through the current chapter the reader is
+      if (a >= 0 && rootRef.current) {
+        const el = document.getElementById(CHAPTERS[a].id)!;
+        const r = el.getBoundingClientRect();
+        const next = a + 1 < CHAPTERS.length ? document.getElementById(CHAPTERS[a + 1].id) : null;
+        const end = next ? next.getBoundingClientRect().top : r.bottom;
+        const cp = Math.min(1, Math.max(0, (line - r.top) / Math.max(1, end - r.top)));
+        rootRef.current.style.setProperty('--cp', cp.toFixed(4));
+      }
       const narrow = window.matchMedia('(max-width: 1099px)').matches;
       const probe = narrow ? vh - 28 : line;
       let d = false;
@@ -36,6 +47,12 @@ export default function Folio() {
         if (r.top + vh * 0.12 < probe && r.bottom > probe) d = true;
       });
       setDark(d);
+      let hd = false;
+      document.querySelectorAll<HTMLElement>('[data-ground="dark"]').forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top + vh * 0.12 < 28 && r.bottom > 28) hd = true;
+      });
+      setHeadDark(hd);
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -66,11 +83,7 @@ export default function Folio() {
 
   const jump = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
-    const el = document.getElementById(id);
-    if (!el) return;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const y = el.getBoundingClientRect().top + window.scrollY - (id === 'ch-1' ? 0 : window.innerHeight * 0.02);
-    window.scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+    scrollToId(id, id === 'ch-1' ? 0 : -window.innerHeight * 0.02);
     history.replaceState(null, '', `#${id}`);
     setOpen(false);
   };
@@ -78,6 +91,16 @@ export default function Folio() {
   const cur = active >= 0 ? CHAPTERS[active] : null;
 
   return (
+    <>
+    <p className={s.runHead} data-dark={headDark ? 'true' : 'false'}>
+      <a href={LINKS.cv} target="_blank" rel="noopener noreferrer">
+        CV
+      </a>
+      <span aria-hidden="true">·</span>
+      <a href="#ch-qed" onClick={jump('ch-qed')}>
+        Contact
+      </a>
+    </p>
     <nav
       ref={rootRef}
       className={s.folio}
@@ -105,10 +128,12 @@ export default function Folio() {
             <a href={`#${c.id}`} onClick={jump(c.id)} aria-current={i === active ? 'true' : undefined}>
               <span className={s.folioNum}>{c.num}</span>
               <span className={s.folioTitle}>{c.title}</span>
+              {i === active && <span className={s.folioBar} aria-hidden="true" />}
             </a>
           </li>
         ))}
       </ol>
     </nav>
+    </>
   );
 }

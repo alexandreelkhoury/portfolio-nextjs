@@ -22,7 +22,7 @@ type Opts = {
 
 const PAPER = new THREE.Color('#f2ede3');
 const INK = new THREE.Color('#17150f');
-const VERM = new THREE.Color('#c8401e');
+const VERM = new THREE.Color('#b0361a');
 
 const R = 1.32; // parameter radius
 const NORM = 1 / (R + Math.pow(R, 5) / 5); // planar radius -> 1

@@ -148,6 +148,10 @@ export default function TitlePage() {
           </div>
 
           <canvas ref={frontRef} className={`${s.canvas} ${s.front}`} aria-hidden="true" />
+          <svg className={s.ph} viewBox="0 0 200 120" fill="none" aria-hidden="true">
+            <path d="M20 62 C 60 20, 140 20, 180 62 C 140 100, 60 100, 20 62 Z" />
+            <path d="M48 62 C 76 38, 124 38, 152 62 C 124 84, 76 84, 48 62 Z" opacity="0.5" />
+          </svg>
 
           <div ref={notesRef} className={s.notes} aria-hidden="true">
             <div className={`${s.note} ${s.noteA}`}>

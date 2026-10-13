@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import * as THREE from 'three';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Line, PerspectiveCamera, View } from '@react-three/drei';
 import { buildDevice, type Device } from './devices';
@@ -9,15 +11,25 @@ import { MOTION, PROJECTS, type Project } from './content';
 import s from './site.module.css';
 
 /*
- * Chapter IV. Every device is drawn in the same fixed canvas through drei <View>,
- * which scissors one WebGL context into each plate's box. The canvas only runs
- * while the chapter is on screen. Videos play only while their plate is in view.
+ * Chapter IV. Every device is drawn in one fixed canvas through drei <View>.
+ * Desktop with motion: one pinned stage, about 110vh of scroll per project. Each
+ * project swings in, holds with its screen on (the video lifts off the screen into
+ * the page), then pushes in as the hand-off to the next. The motion work follows as
+ * a pinned horizontal reel.
+ * Mobile, touch and reduced motion: the same plates, stacked in the flow, no pins.
  */
 
 const INK = '#17150f';
 const PAPER = '#f6f2ea';
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
-const ease = (v: number) => 1 - Math.pow(1 - v, 3);
+const smooth = (v: number) => v * v * (3 - 2 * v);
+const p2out = (v: number) => 1 - (1 - v) * (1 - v);
+const p2in = (v: number) => v * v;
+const ease3 = (v: number) => 1 - Math.pow(1 - v, 3);
+const SEG = 1.1; // viewport heights of scroll per project
+const TURN = 0.26; // the first-view nudge, about 15 degrees
+
+export const posterOf = (src: string) => src.replace('/media/', '/media/posters/').replace(/\.mp4$/, '.jpg');
 
 type Ctl = {
   tx: number;
@@ -27,22 +39,38 @@ type Ctl = {
   dragging: boolean;
   lastX: number;
   lastY: number;
+  lastT: number;
+  vel: number;
   rotY: number;
   rotX: number;
   idle: number;
+  nudge: number;
 };
-const newCtl = (): Ctl => ({ tx: 0, ty: 0, x: 0, y: 0, dragging: false, lastX: 0, lastY: 0, rotY: 0, rotX: 0, idle: 0 });
+const newCtl = (): Ctl => ({ tx: 0, ty: 0, x: 0, y: 0, dragging: false, lastX: 0, lastY: 0, lastT: 0, vel: 0, rotY: 0, rotX: 0, idle: 0, nudge: 0 });
 
-function useReduced() {
-  const [r, setR] = useState(false);
+type Rect = { x: number; y: number; w: number; h: number };
+type Reg = { video: HTMLVideoElement | null; screen: Rect | null; ctl: Ctl };
+type Mode = 'stage' | 'flow';
+
+function useMode(): { mode: Mode; reduce: boolean; touch: boolean } {
+  const [st, setSt] = useState<{ mode: Mode; reduce: boolean; touch: boolean }>({ mode: 'stage', reduce: false, touch: false });
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setR(mq.matches);
-    const on = () => setR(mq.matches);
-    mq.addEventListener('change', on);
-    return () => mq.removeEventListener('change', on);
+    const mqR = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mqW = window.matchMedia('(min-width: 900px) and (pointer: fine)');
+    const on = () => {
+      const reduce = mqR.matches;
+      const touch = window.matchMedia('(pointer: coarse)').matches;
+      setSt({ reduce, touch, mode: !reduce && mqW.matches ? 'stage' : 'flow' });
+    };
+    on();
+    mqR.addEventListener('change', on);
+    mqW.addEventListener('change', on);
+    return () => {
+      mqR.removeEventListener('change', on);
+      mqW.removeEventListener('change', on);
+    };
   }, []);
-  return r;
+  return st;
 }
 
 function useInView(ref: RefObject<Element | null>, margin = '0px', threshold = 0.2) {
@@ -57,18 +85,26 @@ function useInView(ref: RefObject<Element | null>, margin = '0px', threshold = 0
   return v;
 }
 
-/* ---------- media textures ---------- */
+/* ---------- media textures: the poster first, the video once it has a frame ---------- */
 
-function useMediaTexture(media: Project['media'], playing: boolean) {
+function useMediaTexture(media: Project['media'], playing: boolean, videoOut: RefObject<HTMLVideoElement | null>) {
   const [tex, setTex] = useState<THREE.Texture | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     let disposed = false;
-    let t: THREE.Texture;
+    const owned: THREE.Texture[] = [];
+    const loader = new THREE.TextureLoader();
+    const keep = (t: THREE.Texture) => {
+      t.colorSpace = THREE.SRGBColorSpace;
+      owned.push(t);
+      return t;
+    };
     if (media.kind === 'video') {
+      loader.load(posterOf(media.src), (img) => {
+        if (disposed) return img.dispose();
+        setTex((cur) => cur ?? keep(img));
+      });
       const v = document.createElement('video');
-      v.src = media.src;
       v.muted = true;
       v.defaultMuted = true;
       v.setAttribute('muted', '');
@@ -76,35 +112,36 @@ function useMediaTexture(media: Project['media'], playing: boolean) {
       v.playsInline = true;
       v.setAttribute('playsinline', '');
       v.preload = 'metadata';
-      videoRef.current = v;
-      t = new THREE.VideoTexture(v);
-      t.colorSpace = THREE.SRGBColorSpace;
-      setTex(t);
+      v.src = media.src;
+      videoOut.current = v;
+      const vt = keep(new THREE.VideoTexture(v));
+      v.addEventListener('loadeddata', () => !disposed && setTex(vt), { once: true });
     } else {
-      new THREE.TextureLoader().load(media.src, (img) => {
+      loader.load(media.src, (img) => {
         if (disposed) return img.dispose();
-        img.colorSpace = THREE.SRGBColorSpace;
         img.anisotropy = 4;
-        t = img;
-        setTex(img);
+        setTex(keep(img));
       });
     }
     return () => {
       disposed = true;
-      videoRef.current?.pause();
-      videoRef.current?.removeAttribute('src');
-      videoRef.current?.load();
-      videoRef.current = null;
-      t?.dispose();
+      const v = videoOut.current;
+      if (v) {
+        v.pause();
+        v.removeAttribute('src');
+        v.load();
+      }
+      videoOut.current = null;
+      owned.forEach((t) => t.dispose());
     };
-  }, [media.kind, media.src]);
+  }, [media.kind, media.src, videoOut]);
 
   useEffect(() => {
-    const v = videoRef.current;
+    const v = videoOut.current;
     if (!v) return;
     if (playing) v.play().catch(() => {});
     else v.pause();
-  }, [playing, tex]);
+  }, [playing, tex, videoOut]);
 
   return tex;
 }
@@ -123,16 +160,53 @@ function cover(tex: THREE.Texture, mediaAspect: number, screen: number) {
 
 /* ---------- the 3D scene inside one plate ---------- */
 
-function PartMesh({ part, tex, aspect, screenOn }: { part: Device['base']; tex: THREE.Texture | null; aspect: number; screenOn: RefObject<number> }) {
+const corner = new THREE.Vector3();
+
+function PartMesh({
+  part,
+  tex,
+  aspect,
+  screenOn,
+  reg,
+}: {
+  part: Device['base'];
+  tex: THREE.Texture | null;
+  aspect: number;
+  screenOn: RefObject<number>;
+  reg: Reg;
+}) {
   const matRef = useRef<THREE.MeshBasicMaterial>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
   useEffect(() => {
     if (tex && part.screen) cover(tex, aspect, part.screen.w / part.screen.h);
   }, [tex, aspect, part.screen]);
-  useFrame(() => {
+  useFrame((state) => {
     const m = matRef.current;
     if (m) {
       m.opacity = screenOn.current ?? 1;
       m.color.setScalar(0.35 + 0.65 * (screenOn.current ?? 1));
+    }
+    // where the screen sits on the page, for the video lift-off
+    const mesh = meshRef.current;
+    if (mesh && part.screen) {
+      const g = part.screen.geo;
+      if (!g.boundingBox) g.computeBoundingBox();
+      const b = g.boundingBox!;
+      let x0 = Infinity,
+        y0 = Infinity,
+        x1 = -Infinity,
+        y1 = -Infinity;
+      for (let i = 0; i < 8; i++) {
+        corner.set(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z);
+        corner.applyMatrix4(mesh.matrixWorld).project(state.camera);
+        const px = ((corner.x + 1) / 2) * state.size.width;
+        const py = ((1 - corner.y) / 2) * state.size.height;
+        x0 = Math.min(x0, px);
+        x1 = Math.max(x1, px);
+        y0 = Math.min(y0, py);
+        y1 = Math.max(y1, py);
+      }
+      reg.screen = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
     }
   });
   return (
@@ -143,36 +217,51 @@ function PartMesh({ part, tex, aspect, screenOn }: { part: Device['base']; tex: 
         </mesh>
       ))}
       {part.screen && (
-        <mesh geometry={part.screen.geo}>
+        <mesh ref={meshRef} geometry={part.screen.geo}>
           <meshBasicMaterial ref={matRef} map={tex} color="#ffffff" transparent toneMapped={false} />
         </mesh>
       )}
-      {part.lines.length > 0 && <Line points={part.lines} segments color={INK} lineWidth={1.25} />}
-      {part.detail.length > 0 && <Line points={part.detail} segments color={INK} lineWidth={0.9} transparent opacity={0.42} />}
+      {part.lines.length > 0 && <Line points={part.lines} segments color={INK} lineWidth={1.4} />}
+      {part.detail.length > 0 && <Line points={part.detail} segments color={INK} lineWidth={1.0} transparent opacity={0.42} />}
     </>
   );
 }
 
 function DeviceScene({
   project,
-  ctl,
+  reg,
   track,
+  prog,
+  index,
   playing,
   reduce,
+  onFirst,
+  onEntered,
 }: {
   project: Project;
-  ctl: Ctl;
+  reg: Reg;
   track: RefObject<HTMLDivElement | null>;
+  prog: RefObject<number> | null;
+  index: number;
   playing: boolean;
   reduce: boolean;
+  onFirst: () => void;
+  onEntered: () => void;
 }) {
   const dev = useMemo(() => buildDevice(project.device), [project.device]);
-  const tex = useMediaTexture(project.media, playing);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const tex = useMediaTexture(project.media, playing, videoRef);
   const group = useRef<THREE.Group>(null);
   const lid = useRef<THREE.Group>(null);
   const cam = useRef<THREE.PerspectiveCamera>(null);
   const screenOn = useRef(reduce ? 1 : 0);
   const look = useMemo(() => new THREE.Vector3(), []);
+  const flags = useRef({ first: false, entered: false });
+  const ctl = reg.ctl;
+
+  useEffect(() => {
+    reg.video = videoRef.current;
+  });
 
   useFrame((state, dtRaw) => {
     const dt = Math.min(0.05, dtRaw);
@@ -180,17 +269,46 @@ function DeviceScene({
     const g = group.current;
     const c = cam.current;
     if (!el || !g || !c) return;
-    const r = el.getBoundingClientRect();
+    if (!flags.current.first) {
+      flags.current.first = true;
+      onFirst();
+    }
     const vh = window.innerHeight;
-    // entrance: 0 when the plate's top meets the bottom of the screen, 1 when it is well in
-    const p = reduce ? 1 : ease(clamp01((vh - r.top) / (vh * 0.8)));
-    const drift = reduce ? 0 : (r.top + r.height / 2 - vh / 2) / vh;
+    const staged = !!prog;
+
+    // swing (0..1), hold, push (0..1)
+    let swing: number;
+    let push = 0;
+    let drift = 0;
+    if (staged) {
+      const u = prog!.current * PROJECTS.length - index;
+      g.visible = u > -0.01 && u < 1.01;
+      if (!g.visible) return;
+      swing = reduce ? 1 : p2out(clamp01(u / 0.3));
+      push = reduce ? 0 : p2in(clamp01((u - 0.7) / 0.3));
+    } else {
+      const r = el.getBoundingClientRect();
+      swing = reduce ? 1 : ease3(clamp01((vh - r.top) / (vh * 0.8)));
+      drift = reduce ? 0 : (r.top + r.height / 2 - vh / 2) / vh;
+    }
+    if (swing >= 0.999 && !flags.current.entered) {
+      flags.current.entered = true;
+      onEntered();
+    }
 
     const k = Math.min(1, dt * 4);
     ctl.x += (ctl.tx - ctl.x) * k;
     ctl.y += (ctl.ty - ctl.y) * k;
     if (!ctl.dragging) {
-      ctl.idle += dt;
+      // inertia after release, then a slow ease back home
+      if (Math.abs(ctl.vel) > 0.0004) {
+        ctl.rotY += ctl.vel * dt * 60;
+        ctl.vel *= Math.exp(-dt * 3.2);
+        ctl.idle = 0;
+      } else {
+        ctl.vel = 0;
+        ctl.idle += dt;
+      }
       if (ctl.idle > 1.4) {
         const back = Math.min(1, dt * 1.2);
         ctl.rotY -= ctl.rotY * back;
@@ -199,33 +317,34 @@ function DeviceScene({
     }
 
     const tilt = reduce ? 0 : 1;
-    let ry = ctl.rotY + ctl.x * 0.22 * tilt + drift * 0.25;
+    let ry = ctl.rotY + ctl.nudge + ctl.x * 0.22 * tilt + drift * 0.25;
     let rx = ctl.rotX + ctl.y * 0.1 * tilt;
     let lift = 0;
+    // every device swings in from the left: ry -0.9 to -0.2
+    ry += THREE.MathUtils.lerp(-0.9, -0.2, swing);
     if (dev.kind === 'laptop') {
-      ry += -0.28 + (1 - p) * 0.5;
-      if (lid.current) lid.current.rotation.x = THREE.MathUtils.lerp(Math.PI / 2 - 0.03, -0.24, p);
-      screenOn.current = clamp01((p - 0.55) / 0.35);
+      if (lid.current) lid.current.rotation.x = THREE.MathUtils.lerp(Math.PI / 2 - 0.03, -0.24, smooth(clamp01(swing * 1.15)));
+      screenOn.current = clamp01((swing - 0.6) / 0.35);
     } else if (dev.kind === 'tablet') {
-      ry += 0.32 + (1 - p) * 1.25;
-      rx += -0.16 - (1 - p) * 0.5;
-      lift = (1 - p) * -0.6;
-      screenOn.current = clamp01((p - 0.45) / 0.4);
+      rx += -0.16 - (1 - swing) * 0.4;
+      lift = (1 - swing) * -0.5;
+      screenOn.current = clamp01((swing - 0.5) / 0.4);
     } else {
-      ry += -0.22 - (1 - p) * 0.9;
-      lift = (1 - p) * -0.9;
-      screenOn.current = clamp01((p - 0.5) / 0.4);
+      lift = (1 - swing) * -0.6;
+      screenOn.current = clamp01((swing - 0.5) / 0.4);
     }
     g.rotation.set(rx, ry, 0);
     g.position.y = lift;
 
-    // frame the device in the plate
+    // frame the device: it fills about 80% of its box
     const aspect = state.size.width / Math.max(1, state.size.height);
     const tan = Math.tan(THREE.MathUtils.degToRad(c.fov / 2));
-    const dW = (dev.width * 1.32) / (2 * tan * aspect);
-    const dH = 3.5 / (2 * tan);
-    const d = Math.max(dW, dH);
-    const cy = dev.kind === 'tablet' ? 0 : dev.centerY;
+    const dW = (dev.width * (staged ? 0.95 : 1.12)) / (2 * tan * aspect);
+    const dH = (staged ? 2.7 : 3.1) / (2 * tan);
+    const d0 = Math.max(dW, dH);
+    const dolly = staged ? THREE.MathUtils.lerp(1.7, 1, swing) * THREE.MathUtils.lerp(1, 0.78, push) : 1;
+    const d = d0 * dolly;
+    const cy = (dev.kind === 'tablet' ? 0 : dev.centerY) + push * 0.15;
     c.position.set(0, cy + d * 0.2, d);
     look.set(0, cy - 0.05, 0);
     c.lookAt(look);
@@ -233,13 +352,13 @@ function DeviceScene({
 
   return (
     <>
-      <PerspectiveCamera ref={cam} makeDefault fov={22} near={0.1} far={100} />
+      <PerspectiveCamera ref={cam} makeDefault fov={28} near={0.1} far={100} />
       <group ref={group}>
-        <PartMesh part={dev.base} tex={tex} aspect={project.media.aspect} screenOn={screenOn} />
+        <PartMesh part={dev.base} tex={tex} aspect={project.media.aspect} screenOn={screenOn} reg={reg} />
         {dev.lid && dev.hinge && (
           <group position={dev.hinge}>
             <group ref={lid}>
-              <PartMesh part={dev.lid} tex={tex} aspect={project.media.aspect} screenOn={screenOn} />
+              <PartMesh part={dev.lid} tex={tex} aspect={project.media.aspect} screenOn={screenOn} reg={reg} />
             </group>
           </group>
         )}
@@ -259,7 +378,9 @@ function Links({ p }: { p: Project }) {
       {p.github && (
         <>
           {' '}
-          <span className={s.dot} aria-hidden="true">·</span>{' '}
+          <span className={s.dot} aria-hidden="true">
+            ·
+          </span>{' '}
           <a href={p.github} target="_blank" rel="noopener noreferrer">
             GitHub <span aria-hidden="true">↗</span>
           </a>
@@ -269,14 +390,57 @@ function Links({ p }: { p: Project }) {
   );
 }
 
-function Plate({ project, variant, reduce, hint }: { project: Project; variant: 'wide' | 'side' | 'grand' | 'pair'; reduce: boolean; hint?: boolean }) {
-  const ctl = useMemo(newCtl, []);
+/** a line drawing shown in place of a canvas until its first frame renders */
+function DevicePlaceholder() {
+  return (
+    <svg className={s.ph} viewBox="0 0 160 100" fill="none" aria-hidden="true">
+      <path d="M38 22 H122 V70 H38 Z M30 70 H130 L138 80 H22 Z" />
+      <path d="M46 30 H114 V62 H46 Z" opacity="0.4" />
+    </svg>
+  );
+}
+
+type Shared = { dragged: boolean; setDragged: () => void };
+
+function Plate({
+  project,
+  index,
+  mode,
+  reduce,
+  touch,
+  reg,
+  prog,
+  shared,
+  active,
+}: {
+  project: Project;
+  index: number;
+  mode: Mode;
+  reduce: boolean;
+  touch: boolean;
+  reg: Reg;
+  prog: RefObject<number> | null;
+  shared: Shared;
+  active: boolean;
+}) {
   const stageRef = useRef<HTMLDivElement>(null);
-  const inView = useInView(stageRef, '0px', 0.2);
+  const viewRef = useRef<HTMLDivElement>(null);
+  const inViewFlow = useInView(stageRef, '0px', 0.2);
+  const inView = mode === 'stage' ? active : inViewFlow;
   const [userPaused, setUserPaused] = useState<boolean | null>(null);
+  const [ready, setReady] = useState(false);
+  const [grab, setGrab] = useState(false);
   const isVideo = project.media.kind === 'video';
   const paused = userPaused ?? reduce;
   const playing = isVideo && inView && !paused;
+  const ctl = reg.ctl;
+  const down = useRef({ x: 0, y: 0, moved: false });
+
+  const onEntered = () => {
+    setGrab(true);
+    // the first-view nudge: turn about 15 degrees and back, so it reads as turnable
+    if (!reduce && !shared.dragged) gsap.to(ctl, { nudge: TURN, duration: 0.9, ease: 'sine.inOut', yoyo: true, repeat: 1, delay: 0.15 });
+  };
 
   const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -285,22 +449,42 @@ function Plate({ project, variant, reduce, hint }: { project: Project; variant: 
       ctl.ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
     }
     if (ctl.dragging) {
-      ctl.rotY += (e.clientX - ctl.lastX) * 0.008;
+      const dx = e.clientX - ctl.lastX;
+      const now = performance.now();
+      const step = dx * 0.008;
+      const frames = Math.max(1, (now - ctl.lastT) / 16.7);
+      ctl.vel = ctl.vel * 0.6 + (step / frames) * 0.4;
+      ctl.rotY += step;
       ctl.rotX = Math.max(-0.5, Math.min(0.5, ctl.rotX + (e.clientY - ctl.lastY) * 0.004));
       ctl.lastX = e.clientX;
       ctl.lastY = e.clientY;
+      ctl.lastT = now;
+      if (Math.abs(e.clientX - down.current.x) + Math.abs(e.clientY - down.current.y) > 6) down.current.moved = true;
     }
   };
   const onDown = (e: React.PointerEvent<HTMLDivElement>) => {
     ctl.dragging = true;
     ctl.idle = 0;
+    ctl.vel = 0;
     ctl.lastX = e.clientX;
     ctl.lastY = e.clientY;
+    ctl.lastT = performance.now();
+    down.current = { x: e.clientX, y: e.clientY, moved: false };
+    gsap.killTweensOf(ctl, 'nudge');
+    ctl.rotY += ctl.nudge;
+    ctl.nudge = 0;
+    if (viewRef.current) viewRef.current.dataset.press = 'true';
+    document.documentElement.dataset.grabbing = 'true';
     e.currentTarget.setPointerCapture(e.pointerId);
   };
-  const onUp = () => {
+  const onUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!ctl.dragging) return;
     ctl.dragging = false;
     ctl.idle = 0;
+    if (viewRef.current) viewRef.current.dataset.press = 'false';
+    delete document.documentElement.dataset.grabbing;
+    if (down.current.moved) shared.setDragged();
+    else if (e.pointerType !== 'mouse' && isVideo && e.type === 'pointerup') setUserPaused(!paused); // tap the screen to pause
   };
   const onLeave = () => {
     ctl.tx = 0;
@@ -315,37 +499,69 @@ function Plate({ project, variant, reduce, hint }: { project: Project; variant: 
   };
 
   const kindName = project.device === 'laptop' ? 'a laptop' : project.device === 'tablet' ? 'a tablet' : 'a monitor';
+  const showHint = grab && !shared.dragged && index === 0;
 
   return (
-    <figure className={`${s.plate} ${s[`plate_${variant}`]}`} data-in>
+    <figure className={s.plate} data-plate={index} data-in={mode === 'flow' ? '' : undefined}>
+      {mode === 'stage' && (
+        <span className={s.ghost} data-ghost aria-hidden="true">
+          Fig. {project.fig}
+        </span>
+      )}
       <div
         ref={stageRef}
         className={s.stage}
+        data-ready={ready ? 'true' : 'false'}
+        data-grab={grab ? 'true' : 'false'}
         onPointerMove={onMove}
         onPointerDown={onDown}
         onPointerUp={onUp}
         onPointerCancel={onUp}
         onPointerLeave={onLeave}
         onKeyDown={onKey}
-        tabIndex={0}
+        tabIndex={mode === 'stage' && !active ? -1 : 0}
         role="img"
         aria-label={`${project.title}, shown on ${kindName} drawn in ink. Use the arrow keys or drag to turn it.`}
       >
-        <View className={s.view}>
-          <DeviceScene project={project} ctl={ctl} track={stageRef} playing={playing} reduce={reduce} />
+        <DevicePlaceholder />
+        <View ref={viewRef} className={s.view} data-press="false">
+          <DeviceScene
+            project={project}
+            reg={reg}
+            track={stageRef}
+            prog={mode === 'stage' ? prog : null}
+            index={index}
+            playing={playing}
+            reduce={reduce}
+            onFirst={() => setReady(true)}
+            onEntered={onEntered}
+          />
         </View>
-      </div>
-      <figcaption className={s.plateCap}>
-        <span>
-          Fig. {project.fig}. {project.title}, on {kindName}.{hint ? ' Drag to turn it.' : ''}
+        <span className={s.dragHint} data-on={showHint ? 'true' : 'false'} aria-hidden="true">
+          <svg viewBox="0 0 40 12" fill="none">
+            <path d="M2 6 H38 M6 2 L2 6 L6 10 M34 2 L38 6 L34 10" stroke="currentColor" strokeWidth="1" />
+          </svg>
+          {touch ? 'swipe to turn' : 'drag to turn'}
         </span>
-        {isVideo && (
-          <button type="button" className={s.playBtn} onClick={() => setUserPaused(!paused)} aria-pressed={!paused}>
-            {paused ? 'Play' : 'Pause'}
-          </button>
-        )}
-      </figcaption>
-      <div className={s.plateText}>
+      </div>
+      <div className={s.plateText} data-text>
+        <figcaption className={s.plateCap}>
+          <span>
+            Fig. {project.fig}. {project.title}, on {kindName}.
+          </span>
+          {isVideo && (
+            <button
+              type="button"
+              className={s.playBtn}
+              onClick={() => setUserPaused(!paused)}
+              aria-pressed={!paused}
+              aria-label={paused ? `Play ${project.title}` : `Pause ${project.title}`}
+            >
+              <span aria-hidden="true">{paused ? '▶' : '❚❚'}</span>
+              {paused ? 'Play' : 'Pause'}
+            </button>
+          )}
+        </figcaption>
         <h3 className={s.plateTitle}>{project.title}</h3>
         {project.role && <p className={s.plateRole}>{project.role}</p>}
         <p className={s.plateDesc}>{project.description}</p>
@@ -360,6 +576,13 @@ function Plate({ project, variant, reduce, hint }: { project: Project; variant: 
 function MotionClip({ m, reduce }: { m: (typeof MOTION)[number]; reduce: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   const inView = useInView(ref, '0px', 0.25);
+  const [loaded, setLoaded] = useState(false);
+  // the hatch gives way as soon as there is a picture: the poster, or the first frame
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setLoaded(true);
+    img.src = posterOf(m.src);
+  }, [m.src]);
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
@@ -367,18 +590,21 @@ function MotionClip({ m, reduce }: { m: (typeof MOTION)[number]; reduce: boolean
     else v.pause();
   }, [inView, reduce]);
   return (
-    <figure className={`${s.clip} ${s[`clip_${m.key}`]}`}>
+    <figure className={`${s.clip} ${s[`clip_${m.key}`]}`} style={{ ['--ar' as string]: String(m.aspect) }}>
       <div className={s.clipFrame} style={{ aspectRatio: String(m.aspect) }}>
         <video
           ref={ref}
           src={m.src}
+          poster={posterOf(m.src)}
           muted
           loop
           playsInline
           preload="metadata"
           aria-label={`${m.label}, a motion design loop`}
           controls={reduce}
+          onLoadedData={() => setLoaded(true)}
         />
+        <span className={s.hatch} data-loaded={loaded ? 'true' : 'false'} aria-hidden="true" />
       </div>
       <figcaption className={s.clipCap}>
         7{m.key}. {m.label}
@@ -396,28 +622,207 @@ function ClearPass() {
 }
 
 export default function Figures() {
-  const reduce = useReduced();
+  const { mode, reduce, touch } = useMode();
   const secRef = useRef<HTMLDivElement>(null);
-  const active = useInView(secRef, '15% 0px 15% 0px', 0);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const reelRef = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const glRef = useRef<HTMLDivElement>(null);
+  const liftRef = useRef<HTMLDivElement>(null);
+  const liftVidRef = useRef<HTMLVideoElement>(null);
+  const prog = useRef(0);
+  const visible = useInView(secRef, '15% 0px 15% 0px', 0);
   const [mounted, setMounted] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [dragged, setDraggedState] = useState(false);
+  const regs = useMemo<Reg[]>(() => PROJECTS.map(() => ({ video: null, screen: null, ctl: newCtl() })), []);
   useEffect(() => setMounted(true), []);
-  const [spl, corex, hire, tip, stamp] = PROJECTS;
+
+  const shared: Shared = { dragged, setDragged: () => setDraggedState(true) };
+
+  // the pinned stage and the reel (desktop with motion only)
+  useEffect(() => {
+    if (mode !== 'stage') return;
+    gsap.registerPlugin(ScrollTrigger);
+    const stage = stageRef.current!;
+    const n = PROJECTS.length;
+    const plates = [...stage.querySelectorAll<HTMLElement>('[data-plate]')];
+    const texts = plates.map((p) => p.querySelector<HTMLElement>('[data-text]')!);
+    const ghosts = plates.map((p) => p.querySelector<HTMLElement>('[data-ghost]')!);
+    const lift = liftRef.current!;
+    const liftVid = liftVidRef.current!;
+    let lifted = -1;
+    let cur = -1;
+
+    const liftTarget = (): Rect => {
+      const W = stage.clientWidth;
+      const H = stage.clientHeight;
+      const w = Math.min(W * 0.68, (H * 0.74 * 16) / 9);
+      const h = (w * 9) / 16;
+      const right = parseFloat(getComputedStyle(stage).getPropertyValue('--gutter')) || 56;
+      return { x: W - right - w, y: Math.max(H * 0.07, (H - h) / 2 - H * 0.08), w, h };
+    };
+    const fromScreen = (i: number): Rect | null => {
+      const sc = regs[i].screen;
+      const view = plates[i].querySelector<HTMLElement>(`.${s.view}`);
+      if (!sc || !view) return null;
+      const vr = view.getBoundingClientRect();
+      const sr = stage.getBoundingClientRect();
+      return { x: sc.x + vr.left - sr.left, y: sc.y + vr.top - sr.top, w: sc.w, h: sc.h };
+    };
+    const flipTo = (from: Rect, to: Rect) => ({
+      x: from.x - to.x,
+      y: from.y - to.y,
+      scaleX: from.w / to.w,
+      scaleY: from.h / to.h,
+    });
+    const liftOut = (i: number) => {
+      const p = PROJECTS[i];
+      if (p.media.kind !== 'video') return;
+      lifted = i;
+      const to = liftTarget();
+      gsap.set(lift, { left: to.x, top: to.y, width: to.w, height: to.h });
+      if (liftVid.getAttribute('src') !== p.media.src) {
+        liftVid.poster = posterOf(p.media.src);
+        liftVid.src = p.media.src;
+      }
+      const tv = regs[i].video;
+      if (tv && tv.readyState > 0) {
+        try {
+          liftVid.currentTime = tv.currentTime;
+        } catch {}
+      }
+      liftVid.play().catch(() => {});
+      const from = fromScreen(i) ?? { x: to.x + to.w * 0.2, y: to.y + to.h * 0.2, w: to.w * 0.6, h: to.h * 0.6 };
+      gsap.killTweensOf(lift);
+      gsap.fromTo(lift, { ...flipTo(from, to), opacity: 1 }, { x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1, duration: 0.9, ease: 'expo.out' });
+      stage.dataset.lifted = 'true';
+    };
+    const liftBack = () => {
+      if (lifted < 0) return;
+      const i = lifted;
+      lifted = -1;
+      const to = liftTarget();
+      const from = fromScreen(i);
+      gsap.killTweensOf(lift);
+      const back = from ? flipTo(from, to) : { x: 0, y: 0, scaleX: 0.6, scaleY: 0.6 };
+      gsap.to(lift, {
+        ...back,
+        duration: 0.6,
+        ease: 'expo.inOut',
+        onComplete: () => {
+          gsap.set(lift, { opacity: 0 });
+          if (lifted < 0) liftVid.pause();
+        },
+      });
+      stage.dataset.lifted = 'false';
+    };
+
+    const render = () => {
+      const P = prog.current * n;
+      const i = Math.min(n - 1, Math.floor(P));
+      const u = P - i;
+      if (i !== cur) {
+        cur = i;
+        setActiveIdx(i);
+      }
+      texts.forEach((t, k) => {
+        const uk = P - k;
+        const vis = k === i ? smooth(clamp01((uk - 0.1) / 0.14)) * (1 - smooth(clamp01((uk - 0.8) / 0.12))) : 0;
+        t.style.opacity = vis.toFixed(3);
+        t.style.transform = `translate3d(0, ${((1 - vis) * 16).toFixed(1)}px, 0)`;
+        t.style.visibility = vis > 0.01 ? 'visible' : 'hidden';
+        const gv = k === i ? smooth(clamp01(uk / 0.25)) * (1 - smooth(clamp01((uk - 0.78) / 0.2))) : 0;
+        ghosts[k].style.opacity = gv.toFixed(3);
+        ghosts[k].style.transform = `translate3d(${((0.5 - uk) * 6).toFixed(2)}vw, 0, 0)`;
+      });
+      // a short dip at each hand-off, so one device gives way to the next
+      const fade = Math.min(smooth(clamp01(u / 0.05)), i === n - 1 ? 1 : smooth(clamp01((1 - u) / 0.05)));
+      if (glRef.current) glRef.current.style.opacity = fade.toFixed(3);
+      // the video lifts off during the hold
+      const hold = u > 0.36 && u < 0.64;
+      if (hold && lifted !== i) {
+        liftBack();
+        liftOut(i);
+      } else if (!hold && lifted >= 0) liftBack();
+    };
+
+    const ctx = gsap.context(() => {
+      gsap.to(prog, {
+        current: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: stage,
+          start: 'top top',
+          end: () => `+=${window.innerHeight * SEG * n}`,
+          pin: true,
+          scrub: 0.8,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onLeave: () => liftBack(),
+          onLeaveBack: () => liftBack(),
+        },
+        onUpdate: render,
+      });
+
+      const reel = reelRef.current!;
+      const track = trackRef.current!;
+      gsap.to(track, {
+        x: () => -Math.max(0, track.scrollWidth - reel.clientWidth),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: reel,
+          start: 'top top',
+          end: '+=250%',
+          pin: true,
+          scrub: 0.8,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+    }, secRef);
+    render();
+    ScrollTrigger.refresh();
+
+    return () => {
+      ctx.revert();
+      plates.forEach((_, k) => {
+        texts[k].removeAttribute('style');
+        ghosts[k]?.removeAttribute('style');
+      });
+      if (glRef.current) glRef.current.style.opacity = '';
+    };
+  }, [mode, regs]);
 
   return (
-    <div ref={secRef} className={s.figures}>
-      <Plate project={spl} variant="wide" reduce={reduce} hint />
-      <Plate project={corex} variant="side" reduce={reduce} />
-      <Plate project={hire} variant="grand" reduce={reduce} />
-      <div className={s.pair}>
-        <Plate project={tip} variant="pair" reduce={reduce} />
-        <Plate project={stamp} variant="pair" reduce={reduce} />
+    <div ref={secRef} className={s.figures} data-mode={mode} data-fig-hide={mode === 'stage' ? '' : undefined}>
+      <div ref={stageRef} className={s.figStage}>
+        {PROJECTS.map((p, i) => (
+          <Plate
+            key={p.title}
+            project={p}
+            index={i}
+            mode={mode}
+            reduce={reduce}
+            touch={touch}
+            reg={regs[i]}
+            prog={prog}
+            shared={shared}
+            active={mode === 'stage' ? visible && i === activeIdx : false}
+          />
+        ))}
+        {mode === 'stage' && (
+          <div ref={liftRef} className={s.lift} aria-hidden="true">
+            <video ref={liftVidRef} muted loop playsInline preload="none" />
+          </div>
+        )}
       </div>
 
-      <section className={s.motion} aria-labelledby="motion-title" data-in>
+      <section ref={reelRef} className={s.motion} aria-labelledby="motion-title" data-in={mode === 'flow' ? '' : undefined}>
         <h3 id="motion-title" className={s.motionTitle}>
           Fig. 7. Motion design, built in code.
         </h3>
-        <div className={s.motionGrid}>
+        <div ref={trackRef} className={s.motionGrid}>
           {MOTION.map((m) => (
             <MotionClip key={m.key} m={m} reduce={reduce} />
           ))}
@@ -426,11 +831,11 @@ export default function Figures() {
       </section>
 
       {mounted && (
-        <div className={s.glWrap} data-active={active ? 'true' : 'false'} aria-hidden="true">
+        <div ref={glRef} className={s.glWrap} data-active={visible ? 'true' : 'false'} aria-hidden="true">
           <Canvas
             className={s.gl}
-            dpr={[1, 1.75]}
-            frameloop={active ? 'always' : 'never'}
+            dpr={[1, 2]}
+            frameloop={visible ? 'always' : 'never'}
             gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
             flat
           >
