@@ -13,9 +13,8 @@ import s from './site.module.css';
 /*
  * Chapter IV. Every device is drawn in one fixed canvas through drei <View>.
  * Desktop with motion: one pinned stage, about 110vh of scroll per project. Each
- * project swings in, holds with its screen on (the video lifts off the screen into
- * the page), then pushes in as the hand-off to the next. The motion work follows as
- * a pinned horizontal reel.
+ * project swings in, holds with its screen on, then pushes in as the hand-off to the
+ * next. The motion work follows as a pinned horizontal reel.
  * Mobile, touch and reduced motion: the same plates, stacked in the flow, no pins.
  */
 
@@ -48,8 +47,7 @@ type Ctl = {
 };
 const newCtl = (): Ctl => ({ tx: 0, ty: 0, x: 0, y: 0, dragging: false, lastX: 0, lastY: 0, lastT: 0, vel: 0, rotY: 0, rotX: 0, idle: 0, nudge: 0 });
 
-type Rect = { x: number; y: number; w: number; h: number };
-type Reg = { video: HTMLVideoElement | null; screen: Rect | null; ctl: Ctl };
+type Reg = { video: HTMLVideoElement | null; ctl: Ctl };
 type Mode = 'stage' | 'flow';
 
 function useMode(): { mode: Mode; reduce: boolean; touch: boolean } {
@@ -160,7 +158,6 @@ function cover(tex: THREE.Texture, mediaAspect: number, screen: number) {
 
 /* ---------- the 3D scene inside one plate ---------- */
 
-const corner = new THREE.Vector3();
 
 function PartMesh({
   part,
@@ -176,7 +173,6 @@ function PartMesh({
   reg: Reg;
 }) {
   const matRef = useRef<THREE.MeshBasicMaterial>(null);
-  const meshRef = useRef<THREE.Mesh>(null);
   useEffect(() => {
     if (tex && part.screen) cover(tex, aspect, part.screen.w / part.screen.h);
   }, [tex, aspect, part.screen]);
@@ -185,28 +181,6 @@ function PartMesh({
     if (m) {
       m.opacity = screenOn.current ?? 1;
       m.color.setScalar(0.35 + 0.65 * (screenOn.current ?? 1));
-    }
-    // where the screen sits on the page, for the video lift-off
-    const mesh = meshRef.current;
-    if (mesh && part.screen) {
-      const g = part.screen.geo;
-      if (!g.boundingBox) g.computeBoundingBox();
-      const b = g.boundingBox!;
-      let x0 = Infinity,
-        y0 = Infinity,
-        x1 = -Infinity,
-        y1 = -Infinity;
-      for (let i = 0; i < 8; i++) {
-        corner.set(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z);
-        corner.applyMatrix4(mesh.matrixWorld).project(state.camera);
-        const px = ((corner.x + 1) / 2) * state.size.width;
-        const py = ((1 - corner.y) / 2) * state.size.height;
-        x0 = Math.min(x0, px);
-        x1 = Math.max(x1, px);
-        y0 = Math.min(y0, py);
-        y1 = Math.max(y1, py);
-      }
-      reg.screen = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
     }
   });
   return (
@@ -217,7 +191,7 @@ function PartMesh({
         </mesh>
       ))}
       {part.screen && (
-        <mesh ref={meshRef} geometry={part.screen.geo}>
+        <mesh geometry={part.screen.geo}>
           <meshBasicMaterial ref={matRef} map={tex} color="#ffffff" transparent toneMapped={false} />
         </mesh>
       )}
@@ -628,14 +602,12 @@ export default function Figures() {
   const reelRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const glRef = useRef<HTMLDivElement>(null);
-  const liftRef = useRef<HTMLDivElement>(null);
-  const liftVidRef = useRef<HTMLVideoElement>(null);
   const prog = useRef(0);
   const visible = useInView(secRef, '15% 0px 15% 0px', 0);
   const [mounted, setMounted] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
   const [dragged, setDraggedState] = useState(false);
-  const regs = useMemo<Reg[]>(() => PROJECTS.map(() => ({ video: null, screen: null, ctl: newCtl() })), []);
+  const regs = useMemo<Reg[]>(() => PROJECTS.map(() => ({ video: null, ctl: newCtl() })), []);
   useEffect(() => setMounted(true), []);
 
   const shared: Shared = { dragged, setDragged: () => setDraggedState(true) };
@@ -649,76 +621,8 @@ export default function Figures() {
     const plates = [...stage.querySelectorAll<HTMLElement>('[data-plate]')];
     const texts = plates.map((p) => p.querySelector<HTMLElement>('[data-text]')!);
     const ghosts = plates.map((p) => p.querySelector<HTMLElement>('[data-ghost]')!);
-    const lift = liftRef.current!;
-    const liftVid = liftVidRef.current!;
-    let lifted = -1;
     let cur = -1;
 
-    const liftTarget = (): Rect => {
-      const W = stage.clientWidth;
-      const H = stage.clientHeight;
-      const w = Math.min(W * 0.68, (H * 0.74 * 16) / 9);
-      const h = (w * 9) / 16;
-      const right = parseFloat(getComputedStyle(stage).getPropertyValue('--gutter')) || 56;
-      return { x: W - right - w, y: Math.max(H * 0.07, (H - h) / 2 - H * 0.08), w, h };
-    };
-    const fromScreen = (i: number): Rect | null => {
-      const sc = regs[i].screen;
-      const view = plates[i].querySelector<HTMLElement>(`.${s.view}`);
-      if (!sc || !view) return null;
-      const vr = view.getBoundingClientRect();
-      const sr = stage.getBoundingClientRect();
-      return { x: sc.x + vr.left - sr.left, y: sc.y + vr.top - sr.top, w: sc.w, h: sc.h };
-    };
-    const flipTo = (from: Rect, to: Rect) => ({
-      x: from.x - to.x,
-      y: from.y - to.y,
-      scaleX: from.w / to.w,
-      scaleY: from.h / to.h,
-    });
-    const liftOut = (i: number) => {
-      const p = PROJECTS[i];
-      if (p.media.kind !== 'video') return;
-      lifted = i;
-      const to = liftTarget();
-      gsap.set(lift, { left: to.x, top: to.y, width: to.w, height: to.h });
-      if (liftVid.getAttribute('src') !== p.media.src) {
-        liftVid.poster = posterOf(p.media.src);
-        liftVid.src = p.media.src;
-      }
-      const tv = regs[i].video;
-      if (tv && tv.readyState > 0) {
-        try {
-          liftVid.currentTime = tv.currentTime;
-        } catch {}
-      }
-      liftVid.play().catch(() => {});
-      const from = fromScreen(i) ?? { x: to.x + to.w * 0.2, y: to.y + to.h * 0.2, w: to.w * 0.6, h: to.h * 0.6 };
-      gsap.killTweensOf(lift);
-      gsap.fromTo(lift, { ...flipTo(from, to), opacity: 1 }, { x: 0, y: 0, scaleX: 1, scaleY: 1, opacity: 1, duration: 0.9, ease: 'expo.out' });
-      stage.dataset.lifted = 'true';
-    };
-    const liftBack = () => {
-      if (lifted < 0) return;
-      const i = lifted;
-      lifted = -1;
-      const to = liftTarget();
-      const from = fromScreen(i);
-      gsap.killTweensOf(lift);
-      const back = from ? flipTo(from, to) : { x: 0, y: 0, scaleX: 0.6, scaleY: 0.6 };
-      gsap.to(lift, {
-        ...back,
-        duration: 0.6,
-        ease: 'expo.inOut',
-        onComplete: () => {
-          gsap.set(lift, { opacity: 0 });
-          if (lifted < 0) liftVid.pause();
-        },
-      });
-      stage.dataset.lifted = 'false';
-    };
-
-    let stageST: ScrollTrigger | undefined;
     const render = () => {
       const P = prog.current * n;
       const i = Math.min(n - 1, Math.floor(P));
@@ -740,17 +644,10 @@ export default function Figures() {
       // a short dip at each hand-off, so one device gives way to the next
       const fade = Math.min(smooth(clamp01(u / 0.05)), i === n - 1 ? 1 : smooth(clamp01((1 - u) / 0.05)));
       if (glRef.current) glRef.current.style.opacity = fade.toFixed(3);
-      // the video lifts off during the hold
-      // only while the stage is pinned: scrub lag must not lift a video after the stage has gone
-      const hold = u > 0.36 && u < 0.64 && (stageST?.isActive ?? false);
-      if (hold && lifted !== i) {
-        liftBack();
-        liftOut(i);
-      } else if (!hold && lifted >= 0) liftBack();
     };
 
     const ctx = gsap.context(() => {
-      const stageTween = gsap.to(prog, {
+      gsap.to(prog, {
         current: 1,
         ease: 'none',
         scrollTrigger: {
@@ -761,12 +658,9 @@ export default function Figures() {
           scrub: 0.8,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          onLeave: () => liftBack(),
-          onLeaveBack: () => liftBack(),
         },
         onUpdate: render,
       });
-      stageST = stageTween.scrollTrigger;
 
       const reel = reelRef.current!;
       const track = trackRef.current!;
@@ -814,11 +708,6 @@ export default function Figures() {
             active={mode === 'stage' ? visible && i === activeIdx : false}
           />
         ))}
-        {mode === 'stage' && (
-          <div ref={liftRef} className={s.lift} aria-hidden="true">
-            <video ref={liftVidRef} muted loop playsInline preload="none" />
-          </div>
-        )}
       </div>
 
       <section ref={reelRef} className={s.motion} aria-labelledby="motion-title" data-in={mode === 'flow' ? '' : undefined}>
